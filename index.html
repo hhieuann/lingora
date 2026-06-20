@@ -283,6 +283,31 @@
   .cb-stat .n{font-family:var(--ff-mono);font-size:16px;font-weight:500;color:var(--ink);line-height:1}
   .cb-stat .l{font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
 
+  /* ---- Nguồn âm thanh: Mic vs Cuộc họp ---- */
+  .src-toggle{display:flex;align-items:center;gap:4px;flex-shrink:0;background:var(--page-2);border:1px solid var(--line);border-radius:14px;padding:5px}
+  .src-opt{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:800;color:var(--muted);padding:8px 12px;border-radius:10px;transition:.16s;white-space:nowrap}
+  .src-opt svg{width:16px;height:16px}
+  .src-opt:hover{color:var(--ink)}
+  .src-opt.active{background:var(--page);color:var(--amber-deep);box-shadow:var(--shadow-sm)}
+  .src-opt.active svg{color:var(--amber)}
+  @media (max-width:1180px){.src-opt span{display:none}.src-opt{padding:9px 11px}}
+
+  /* nút ghi đổi icon theo nguồn */
+  .rec-btn .headset{display:none}
+  .rec-btn.src-meeting:not(.recording){background:var(--pen)}
+  .rec-btn.src-meeting:not(.recording):hover{box-shadow:0 8px 20px rgba(47,111,176,.45)}
+  .rec-btn.src-meeting .mic{display:none}
+  .rec-btn.src-meeting .headset{display:block}
+  .rec-btn.recording .mic,.rec-btn.recording .headset{display:none}
+
+  /* ---- Banner "đang nghe cuộc họp" ---- */
+  .tx-meeting{margin:2px 10px 0;padding:13px 16px;border-radius:14px;background:var(--pen-tint);border:1px solid #cfe0f1;display:none;align-items:flex-start;gap:11px}
+  .tx-meeting.on{display:flex}
+  .tx-meeting .mt-ico{font-size:18px;line-height:1.25;flex-shrink:0}
+  .tx-meeting .mt-title{font-size:13.5px;font-weight:800;color:var(--pen);display:flex;align-items:center;gap:8px}
+  .tx-meeting .mt-dot{width:7px;height:7px;border-radius:50%;background:var(--rec);animation:pulse 1.4s ease-in-out infinite}
+  .tx-meeting .mt-sub{font-size:12.5px;color:var(--muted);font-weight:600;margin-top:3px;line-height:1.5}
+
   /* Toast */
   .toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;font-size:13.5px;font-weight:700;padding:12px 19px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:.3s;z-index:100;display:flex;align-items:center;gap:9px;max-width:90vw}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -400,7 +425,7 @@
             </svg>
           </div>
           <h3>Bắt đầu buổi học</h3>
-          <p>Nhấn <b>Phát demo</b> để xem một bài giảng mẫu được dịch trực tiếp, hoặc <b>Bắt đầu ghi</b> để dịch &amp; ghi chú bài giảng của bạn theo thời gian thực.</p>
+          <p>Nhấn <b>Phát demo</b> để xem bài giảng mẫu được dịch trực tiếp, <b>Bắt đầu ghi</b> để thu giọng của bạn, hoặc <b>Nghe cuộc họp</b> để bắt âm thanh từ tab meeting (tiếng giảng viên/người khác).</p>
           <div class="empty-actions">
             <button class="btn btn-primary" id="emptyDemo">
               <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Phát demo
@@ -408,11 +433,21 @@
             <button class="btn btn-ghost" id="emptyMic">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>Bắt đầu ghi
             </button>
+            <button class="btn btn-ghost" id="emptyMeeting">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14v-2a9 9 0 0 1 18 0v2"/><path d="M21 15a2 2 0 0 1-2 2h-1v-5h1a2 2 0 0 1 2 2z"/><path d="M3 15a2 2 0 0 0 2 2h1v-5H5a2 2 0 0 0-2 2z"/></svg>Nghe cuộc họp
+            </button>
           </div>
         </div>
         <div class="tx-interim" id="txInterim">
           <span class="chip src" id="interimChip">EN</span>
           <span class="seg-text" id="interimText"></span>
+        </div>
+        <div class="tx-meeting" id="txMeeting">
+          <span class="mt-ico">🎧</span>
+          <div class="mt-body">
+            <div class="mt-title">Đang nghe âm thanh cuộc họp <span class="mt-dot"></span></div>
+            <div class="mt-sub" id="txMeetingSub">Phần nhận dạng &amp; dịch trực tiếp sẽ bật ở Bước 2 (backend). Hiện đang thu âm thật của cuộc họp.</div>
+          </div>
         </div>
       </div>
     </section>
@@ -463,12 +498,24 @@
     <div class="cb-rec">
       <button class="rec-btn" id="recBtn" aria-label="Bắt đầu / dừng ghi">
         <svg class="mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+        <svg class="headset" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14v-2a9 9 0 0 1 18 0v2"/><path d="M21 15a2 2 0 0 1-2 2h-1v-5h1a2 2 0 0 1 2 2z"/><path d="M3 15a2 2 0 0 0 2 2h1v-5H5a2 2 0 0 0-2 2z"/></svg>
         <svg class="stop" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
       </button>
       <div class="rec-label">
         <span class="t" id="recTitle">Bắt đầu ghi</span>
         <span class="s" id="recSub">Dịch &amp; ghi chú bài giảng</span>
       </div>
+    </div>
+
+    <div class="src-toggle" id="srcToggle" role="tablist" aria-label="Nguồn âm thanh">
+      <button class="src-opt active" data-src="mic" role="tab" aria-selected="true" title="Thu micro của bạn (giọng bạn nói)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+        <span>Mic của tôi</span>
+      </button>
+      <button class="src-opt" data-src="meeting" role="tab" aria-selected="false" title="Nghe âm thanh cuộc họp/bài giảng phát ra từ tab (tiếng người khác)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14v-2a9 9 0 0 1 18 0v2"/><path d="M21 15a2 2 0 0 1-2 2h-1v-5h1a2 2 0 0 1 2 2z"/><path d="M3 15a2 2 0 0 0 2 2h1v-5H5a2 2 0 0 0-2 2z"/></svg>
+        <span>Cuộc họp</span>
+      </button>
     </div>
 
     <div class="cb-langs">
@@ -506,11 +553,17 @@
 <script>
 /* =========================================================
    LINGORA STUDY — Dịch & ghi chú bài giảng (1 file HTML)
-   - Ghi giọng nói: Web Speech API (Chrome/Edge, cần HTTPS)
-   - Dịch:          MyMemory API (free, không cần key)
-   - Phát âm:       SpeechSynthesis (đọc từ vựng)
-   - Tóm tắt:       demo + extractive cơ bản (next step: LLM qua backend)
+   - Ghi giọng nói:  Web Speech API (Chrome/Edge, cần HTTPS) — chỉ nghe MIC của bạn
+   - Nghe cuộc họp:  getDisplayMedia bắt âm thanh tab/màn hình (tiếng người khác).
+                     Web Speech KHÔNG nhận luồng này → nhận dạng giọng nói chạy ở backend (Bước 2).
+   - Dịch:           MyMemory API (free, không cần key)
+   - Phát âm:        SpeechSynthesis (đọc từ vựng)
+   - Tóm tắt:        demo + extractive cơ bản (next step: LLM qua backend)
    ========================================================= */
+
+/* Cấu hình backend (Bước 2). "" = chưa có backend → dịch dùng MyMemory, tóm tắt extractive,
+   và "âm thanh cuộc họp" ở chế độ thu-chờ. Đặt URL backend để bật nhận dạng/dịch qua server. */
+const API_BASE = "";
 
 const LANGS = [
   {code:"en", bcp:"en-US", name:"English"},
@@ -527,7 +580,7 @@ const LANGS = [
   {code:"hi", bcp:"hi-IN", name:"हिन्दी"},
 ];
 
-const state = {mode:"idle",seconds:0,timerId:null,segments:[],autoscroll:true,recognition:null,audioCtx:null,analyser:null,micStream:null};
+const state = {mode:"idle",source:"mic",seconds:0,timerId:null,segments:[],autoscroll:true,recognition:null,audioCtx:null,analyser:null,micStream:null,displayStream:null};
 
 const $ = id => document.getElementById(id);
 const txBody=$("txBody"),txEmpty=$("txEmpty"),txInterim=$("txInterim"),interimText=$("interimText"),interimChip=$("interimChip"),
@@ -542,7 +595,10 @@ function init(){
   LANGS.forEach(l=>{srcSel.add(new Option(l.name,l.code));tgtSel.add(new Option(l.name,l.code));});
   srcSel.value="en";tgtSel.value="vi";updateLangPair();
 
-  recBtn.onclick=toggleRecording; $("emptyMic").onclick=toggleRecording;
+  recBtn.onclick=toggleRecording;
+  $("emptyMic").onclick=()=>{setSource("mic");toggleRecording();};
+  $("emptyMeeting").onclick=()=>{setSource("meeting");toggleRecording();};
+  document.querySelectorAll(".src-opt").forEach(b=>{b.onclick=()=>setSource(b.dataset.src);});
   demoBtn.onclick=toggleDemo;      $("emptyDemo").onclick=toggleDemo;
   swapBtn.onclick=swapLangs;
   srcSel.onchange=()=>{updateLangPair();restartRecognitionIfNeeded();};
@@ -570,7 +626,8 @@ function init(){
   });
 
   if(!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)){
-    recSub.textContent="Mic cần Chrome/Edge (HTTPS)"; recBtn.style.opacity=".6";
+    // Mic (Web Speech) cần Chrome/Edge; chế độ "Cuộc họp" (getDisplayMedia) vẫn dùng được.
+    if(state.source==="mic")recSub.textContent="Mic cần Chrome/Edge — thử “Cuộc họp”";
   }
   startWaveform();
 }
@@ -585,7 +642,7 @@ function startTimer(){if(state.timerId)return;state.timerId=setInterval(()=>{sta
 function stopTimer(){clearInterval(state.timerId);state.timerId=null;}
 function setStatus(mode){
   state.mode=mode;
-  if(mode==="recording"){statusPill.dataset.state="rec";statusText.textContent="Đang ghi";txLive.classList.add("on");}
+  if(mode==="recording"){statusPill.dataset.state="rec";statusText.textContent=state.source==="meeting"?"Đang nghe cuộc họp":"Đang ghi";txLive.classList.add("on");}
   else if(mode==="demo"){statusPill.dataset.state="demo";statusText.textContent="Đang phát demo";txLive.classList.add("on");}
   else{statusPill.dataset.state="idle";statusText.textContent="Sẵn sàng";txLive.classList.remove("on");}
 }
@@ -636,7 +693,11 @@ async function translate(text,from,to){
 function speak(text,lang){try{const u=new SpeechSynthesisUtterance(text);u.lang=lang||"en-US";u.rate=.92;speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}}
 
 /* ---------- GHI GIỌNG NÓI ---------- */
-function toggleRecording(){if(state.mode==="demo")stopDemo();if(state.mode==="recording")stopRecording();else startRecording();}
+function toggleRecording(){
+  if(state.mode==="demo")stopDemo();
+  if(state.mode==="recording"){ state.source==="meeting"?stopMeetingCapture():stopRecording(); return; }
+  state.source==="meeting"?startMeetingCapture():startRecording();
+}
 function startRecording(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){showToast("Trình duyệt chưa hỗ trợ ghi giọng nói. Hãy dùng Chrome/Edge trên bản deploy HTTPS, hoặc thử Phát demo.");return;}
@@ -661,26 +722,109 @@ function startRecording(){
 function stopRecording(){
   if(state.recognition){state.recognition.onend=null;try{state.recognition.stop();}catch(_){}state.recognition=null;}
   txInterim.classList.remove("on");teardownMic();setStatus("idle");stopTimer();
-  recBtn.classList.remove("recording");recTitle.textContent="Bắt đầu ghi";recSub.textContent="Dịch & ghi chú bài giảng";
-  maybeShowGenButton();
+  resetRecUI();maybeShowGenButton();
 }
-function restartRecognitionIfNeeded(){if(state.mode==="recording"){stopRecording();startRecording();}}
+function restartRecognitionIfNeeded(){if(state.mode==="recording"&&state.source==="mic"){stopRecording();startRecording();}}
+
+/* ---------- NGUỒN ÂM THANH (mic vs cuộc họp) ---------- */
+function resetRecUI(){
+  recBtn.classList.remove("recording");
+  recBtn.classList.toggle("src-meeting",state.source==="meeting");
+  if(state.source==="meeting"){recTitle.textContent="Bắt đầu nghe";recSub.textContent="Nghe âm thanh cuộc họp (tab)";}
+  else{recTitle.textContent="Bắt đầu ghi";recSub.textContent="Dịch & ghi chú bài giảng";}
+}
+function setSource(src){
+  if(src===state.source)return;
+  if(state.mode==="recording"){ state.source==="meeting"?stopMeetingCapture():stopRecording(); }
+  if(state.mode==="demo")stopDemo();
+  state.source=src;
+  document.querySelectorAll(".src-opt").forEach(b=>{const on=b.dataset.src===src;b.classList.toggle("active",on);b.setAttribute("aria-selected",on?"true":"false");});
+  resetRecUI();
+}
 async function commitUtterance(text){
   const seg={id:"s"+Date.now()+Math.random().toString(36).slice(2,6),time:timeStamp(),speaker:"Giảng viên",color:speakerColor("GiangVien"),srcCode:srcSel.value,tgtCode:tgtSel.value,src:text,tgt:null};
   state.segments.push(seg);renderSegment(seg,{typing:true});refreshWordCount();
   const t=await translate(text,srcSel.value,tgtSel.value);seg.tgt=t;updateSegmentTgt(seg.id,t);scrollDown();
 }
 
-/* ---------- ÂM LƯỢNG MIC ---------- */
-async function setupMicLevel(){
+/* ---------- ÂM LƯỢNG (mic & cuộc họp) ---------- */
+function setupLevelFromStream(stream){
   try{
-    state.micStream=await navigator.mediaDevices.getUserMedia({audio:true});
     state.audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-    const src=state.audioCtx.createMediaStreamSource(state.micStream);
+    const src=state.audioCtx.createMediaStreamSource(stream);
     state.analyser=state.audioCtx.createAnalyser();state.analyser.fftSize=64;src.connect(state.analyser);
   }catch(e){}
 }
-function teardownMic(){if(state.micStream){state.micStream.getTracks().forEach(t=>t.stop());state.micStream=null;}if(state.audioCtx){state.audioCtx.close();state.audioCtx=null;}state.analyser=null;}
+async function setupMicLevel(){
+  try{state.micStream=await navigator.mediaDevices.getUserMedia({audio:true});setupLevelFromStream(state.micStream);}catch(e){}
+}
+function teardownMic(){if(state.micStream){state.micStream.getTracks().forEach(t=>t.stop());state.micStream=null;}if(state.audioCtx){try{state.audioCtx.close();}catch(_){}state.audioCtx=null;}state.analyser=null;}
+
+/* ---------- NGHE ÂM THANH CUỘC HỌP (tab / màn hình) ----------
+   Web Speech API chỉ nghe được MIC. Muốn "nghe" giảng viên/người khác trong meeting,
+   ta bắt âm thanh tab/hệ thống bằng getDisplayMedia. Việc biến luồng này thành chữ cần
+   một engine STT khác — sẽ chạy ở backend (Bước 2). Hiện tại: capture + waveform THẬT,
+   kèm hook sẵn sàng cắm backend. */
+let meetingRec=null;
+async function startMeetingCapture(){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getDisplayMedia){
+    showToast("Trình duyệt chưa hỗ trợ bắt âm thanh tab. Hãy dùng Chrome/Edge mới nhất (HTTPS).");return;
+  }
+  let stream;
+  try{
+    stream=await navigator.mediaDevices.getDisplayMedia({video:true,audio:true});
+  }catch(e){ showToast("Đã huỷ, hoặc cần cấp quyền chia sẻ tab/màn hình."); return; }
+  const audioTracks=stream.getAudioTracks();
+  if(!audioTracks.length){
+    stream.getTracks().forEach(t=>t.stop());
+    showToast("Chưa bắt được âm thanh. Khi chọn nguồn, nhớ TICK ô “Cũng chia sẻ âm thanh” (Share tab/system audio).");
+    return;
+  }
+  state.displayStream=stream;
+  // Người dùng bấm "Stop sharing" trên thanh của trình duyệt → tự dừng.
+  audioTracks[0].addEventListener("ended",()=>{ if(state.mode==="recording"&&state.source==="meeting") stopMeetingCapture(); });
+  setupLevelFromStream(stream);
+  setStatus("recording");startTimer();
+  recBtn.classList.add("recording");recTitle.textContent="Dừng nghe";recSub.textContent="Đang nghe cuộc họp…";
+  txEmpty.style.display="none";$("txMeeting").classList.add("on");scrollDown();
+  startMeetingTranscription(stream);
+  showToast("Đang nghe âm thanh cuộc họp. Waveform bên dưới phản ánh tiếng thật của tab.");
+}
+function stopMeetingCapture(){
+  stopMeetingTranscription();
+  if(state.displayStream){state.displayStream.getTracks().forEach(t=>t.stop());state.displayStream=null;}
+  $("txMeeting").classList.remove("on");
+  teardownMic();setStatus("idle");stopTimer();
+  resetRecUI();maybeShowGenButton();
+}
+function startMeetingTranscription(stream){
+  const sub=$("txMeetingSub");
+  if(!API_BASE){
+    sub.textContent="Phần nhận dạng & dịch trực tiếp sẽ bật ở Bước 2 (backend). Hiện đang thu âm thật của cuộc họp.";
+    return;
+  }
+  // Có backend: cắt audio theo chunk 5s rồi gửi /api/stt → nhận text → dịch & hiển thị.
+  sub.textContent="Đang nhận dạng giọng nói qua server…";
+  try{
+    meetingRec=new MediaRecorder(stream);
+    meetingRec.ondataavailable=async ev=>{
+      if(!ev.data||!ev.data.size)return;
+      try{
+        const fd=new FormData();fd.append("audio",ev.data,"chunk.webm");fd.append("source",srcSel.value);
+        const r=await fetch(API_BASE+"/api/stt",{method:"POST",body:fd});
+        const d=await r.json();
+        if(d&&d.text&&d.text.trim())await commitMeetingUtterance(d.text.trim());
+      }catch(err){console.warn("stt error",err);}
+    };
+    meetingRec.start(5000);
+  }catch(e){console.warn("MediaRecorder error",e);}
+}
+function stopMeetingTranscription(){ if(meetingRec){try{meetingRec.stop();}catch(_){}}meetingRec=null; }
+async function commitMeetingUtterance(text){
+  const seg={id:"m"+Date.now()+Math.random().toString(36).slice(2,6),time:timeStamp(),speaker:"Cuộc họp",color:speakerColor("CuocHop"),srcCode:srcSel.value,tgtCode:tgtSel.value,src:text,tgt:null};
+  state.segments.push(seg);renderSegment(seg,{typing:true});refreshWordCount();
+  const t=await translate(text,srcSel.value,tgtSel.value);seg.tgt=t;updateSegmentTgt(seg.id,t);scrollDown();
+}
 
 /* ---------- WAVEFORM ---------- */
 function startWaveform(){
@@ -720,7 +864,7 @@ const DEMO=[
 let demoTimer=null,demoIdx=0;
 function toggleDemo(){if(state.mode==="demo")stopDemo();else startDemo();}
 function startDemo(){
-  if(state.mode==="recording")stopRecording();
+  if(state.mode==="recording"){state.source==="meeting"?stopMeetingCapture():stopRecording();}
   demoIdx=0;setStatus("demo");startTimer();
   demoBtn.classList.add("playing");demoLabel.textContent="Dừng demo";
   recBtn.style.opacity=".5";recBtn.style.pointerEvents="none";
@@ -856,7 +1000,7 @@ function esc(s){return String(s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;","
 
 /* ---------- TIỆN ÍCH ---------- */
 function clearSession(){
-  if(state.mode!=="idle"){stopRecording();stopDemo();}
+  if(state.mode!=="idle"){if(state.mode==="recording"){state.source==="meeting"?stopMeetingCapture():stopRecording();}stopDemo();}
   state.segments=[];state.seconds=0;clock.textContent="00:00";
   txBody.querySelectorAll(".seg").forEach(s=>s.remove());txEmpty.style.display="flex";
   refreshWordCount();$("genBtn").style.display="none";
