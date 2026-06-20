@@ -3,428 +3,309 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lingora — Live Meeting Translator & Summarizer</title>
-<meta name="description" content="Dịch và tóm tắt nội dung họp online theo thời gian thực.">
+<title>Lingora Study — Dịch & ghi chú bài giảng</title>
+<meta name="description" content="Trợ lý học tập: dịch và tóm tắt bài giảng online theo thời gian thực, kèm từ vựng và bài tập.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Nunito:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    /* Workspace (light) */
-    --bg:#ECEFEC;
-    --surface:#FFFFFF;
-    --surface-2:#F5F7F5;
-    --ink:#10221F;
-    --muted:#5C6B68;
-    --faint:#8A9591;
-    --line:#E2E7E4;
-    --line-strong:#D2DAD6;
-    --teal:#0B6E63;
-    --teal-deep:#0A5C53;
-    --teal-tint:#E2F0ED;
-    --teal-tint-2:#D2E8E3;
-    --coral:#FF5A4D;
-    --coral-tint:#FFE7E4;
-    /* Bars (dark) */
-    --bar:#101F1C;
-    --bar-2:#1A2F2B;
-    --bar-line:#2A413C;
-    --bar-ink:#EAF0EE;
-    --bar-muted:#8FA39E;
-    --teal-bright:#2BD4BC;
-    --shadow:0 1px 2px rgba(16,34,31,.04), 0 8px 24px rgba(16,34,31,.06);
-    --shadow-sm:0 1px 3px rgba(16,34,31,.08);
-    --r:14px;
-    --r-sm:10px;
-    --ff-display:"Bricolage Grotesque", system-ui, sans-serif;
-    --ff-body:"Inter", system-ui, sans-serif;
+    /* Desk / paper */
+    --canvas:#E8EBE4;        /* mặt bàn xanh xám nhạt */
+    --page:#FFFFFF;          /* trang giấy */
+    --page-2:#FAFBF7;
+    --ink:#283139;           /* mực xanh đen */
+    --muted:#646F7C;
+    --faint:#97A1AC;
+    --line:#E8EBE6;
+    --line-strong:#D7DCD5;
+    /* dot grid */
+    --dot:#DDE5DC;
+    /* Brand: bút chì vàng nghệ */
+    --amber:#E89211;
+    --amber-bright:#F6A623;
+    --amber-deep:#B26905;
+    --amber-btn:#C97A0A;
+    --amber-btn-h:#A8620A;
+    --amber-tint:#FDF1DC;
+    --amber-tint-2:#FAE2B7;
+    /* highlighter vàng */
+    --hl:rgba(255,213,79,.62);
+    --hl-2:rgba(255,213,79,.85);
+    /* mực phụ: xanh dương (bút thứ 2) */
+    --pen:#2F6FB0;
+    --pen-tint:#E4EEF8;
+    /* recording */
+    --rec:#E5484D;
+    --rec-tint:#FCE9E9;
+    /* xanh lá: đúng/hoàn thành */
+    --ok:#3A9D6B;
+    --shadow:0 1px 2px rgba(40,49,57,.05), 0 10px 30px rgba(40,49,57,.07);
+    --shadow-sm:0 2px 8px rgba(40,49,57,.08);
+    --r:18px;
+    --r-sm:12px;
+    --ff-display:"Fraunces", Georgia, serif;
+    --ff-body:"Nunito", system-ui, sans-serif;
     --ff-mono:"IBM Plex Mono", ui-monospace, monospace;
   }
-
   *{box-sizing:border-box}
   html,body{height:100%}
   body{
-    margin:0;
-    font-family:var(--ff-body);
-    background:var(--bg);
-    color:var(--ink);
-    -webkit-font-smoothing:antialiased;
-    text-rendering:optimizeLegibility;
+    margin:0;font-family:var(--ff-body);background:var(--canvas);color:var(--ink);
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
   }
   button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
-  ::selection{background:var(--teal-tint-2)}
+  ::selection{background:var(--hl-2)}
 
-  .app{
-    height:100vh;
-    height:100dvh;
-    display:grid;
-    grid-template-rows:auto 1fr auto;
-    overflow:hidden;
-  }
+  .app{height:100vh;height:100dvh;display:grid;grid-template-rows:auto 1fr auto;overflow:hidden}
 
   /* ============ TOP BAR ============ */
   .tb{
-    background:var(--bar);
-    color:var(--bar-ink);
-    display:flex;
-    align-items:center;
-    gap:18px;
-    padding:0 20px;
-    height:60px;
-    border-bottom:1px solid var(--bar-line);
-    flex-wrap:nowrap;
+    background:var(--page);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:18px;padding:0 22px;height:66px;flex-shrink:0;
+    box-shadow:0 1px 0 rgba(40,49,57,.02);
   }
-  .tb-brand{display:flex;align-items:center;gap:11px;flex-shrink:0}
+  .tb-brand{display:flex;align-items:center;gap:12px;flex-shrink:0}
   .tb-logo{
-    width:30px;height:30px;border-radius:9px;flex-shrink:0;
-    background:linear-gradient(145deg,var(--teal-bright),var(--teal));
-    display:grid;place-items:center;position:relative;
-    box-shadow:0 0 0 1px rgba(43,212,188,.25), 0 6px 16px rgba(11,110,99,.45);
+    width:38px;height:38px;border-radius:12px;flex-shrink:0;position:relative;
+    background:linear-gradient(150deg,var(--amber-bright),var(--amber-deep));
+    display:grid;place-items:center;
+    box-shadow:0 4px 12px rgba(178,105,5,.32), inset 0 1px 0 rgba(255,255,255,.3);
   }
-  .tb-logo svg{width:17px;height:17px}
-  .tb-name{font-family:var(--ff-display);font-weight:800;font-size:19px;letter-spacing:-.02em;line-height:1}
-  .tb-name .dot{color:var(--teal-bright)}
+  .tb-logo svg{width:21px;height:21px}
+  .tb-wm{display:flex;flex-direction:column;line-height:1;gap:3px}
+  .tb-name{font-family:var(--ff-display);font-weight:700;font-size:21px;letter-spacing:-.01em}
+  .tb-name .x{color:var(--amber)}
+  .tb-tag{font-size:10.5px;font-weight:700;color:var(--faint);letter-spacing:.05em;text-transform:uppercase}
 
-  .tb-divider{width:1px;height:26px;background:var(--bar-line);flex-shrink:0}
+  .tb-divider{width:1px;height:30px;background:var(--line);flex-shrink:0}
 
-  .tb-meta{display:flex;align-items:center;gap:14px;min-width:0;flex:1}
-  .tb-title-wrap{display:flex;flex-direction:column;min-width:0;gap:1px}
+  .tb-meta{display:flex;flex-direction:column;min-width:0;gap:2px;flex:1}
+  .tb-label{font-size:10.5px;font-weight:700;color:var(--amber);letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;gap:6px;padding-left:7px}
+  .tb-label svg{width:12px;height:12px}
   .tb-title{
-    background:transparent;border:none;color:var(--bar-ink);
-    font-family:var(--ff-body);font-weight:600;font-size:14.5px;
-    padding:3px 6px;border-radius:7px;width:100%;max-width:280px;
-    text-overflow:ellipsis;
+    background:transparent;border:none;color:var(--ink);
+    font-family:var(--ff-display);font-weight:600;font-size:16px;
+    padding:2px 7px;border-radius:8px;width:100%;max-width:340px;text-overflow:ellipsis;
   }
-  .tb-title:hover{background:var(--bar-2)}
-  .tb-title:focus{outline:none;background:var(--bar-2);box-shadow:0 0 0 1.5px var(--teal-bright)}
-  .tb-sub{font-size:11px;color:var(--bar-muted);padding-left:6px;display:flex;align-items:center;gap:8px}
-  .tb-sub .mono{font-family:var(--ff-mono)}
+  .tb-title:hover{background:var(--page-2)}
+  .tb-title:focus{outline:none;background:var(--amber-tint);box-shadow:0 0 0 2px var(--amber-tint-2)}
 
-  .tb-right{display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0}
-
+  .tb-right{display:flex;align-items:center;gap:11px;margin-left:auto;flex-shrink:0}
   .tb-clock{
-    font-family:var(--ff-mono);font-size:14px;font-weight:500;
-    color:var(--bar-ink);letter-spacing:.02em;
-    background:var(--bar-2);padding:6px 11px;border-radius:8px;
-    display:flex;align-items:center;gap:8px;
+    font-family:var(--ff-mono);font-size:14px;font-weight:500;color:var(--ink);
+    background:var(--page-2);border:1px solid var(--line);padding:7px 12px;border-radius:11px;
+    display:flex;align-items:center;gap:9px;
   }
-  .tb-clock .lbl{font-family:var(--ff-body);font-size:10px;color:var(--bar-muted);text-transform:uppercase;letter-spacing:.08em}
+  .tb-clock .lbl{font-family:var(--ff-body);font-size:10px;color:var(--faint);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
 
   .status-pill{
-    display:flex;align-items:center;gap:8px;
-    padding:6px 12px 6px 11px;border-radius:999px;
-    font-size:12px;font-weight:600;letter-spacing:.01em;
-    background:var(--bar-2);color:var(--bar-muted);
-    border:1px solid var(--bar-line);transition:.25s;
+    display:flex;align-items:center;gap:8px;padding:7px 13px 7px 11px;border-radius:999px;
+    font-size:12.5px;font-weight:700;background:var(--page-2);color:var(--muted);
+    border:1px solid var(--line);transition:.25s;
   }
+  .status-pill .seed{width:8px;height:8px;border-radius:50%;background:var(--faint);flex-shrink:0}
   .status-pill .eq{display:none;align-items:flex-end;gap:2px;height:13px}
   .status-pill .eq span{width:2.5px;background:currentColor;border-radius:2px;animation:eq .9s ease-in-out infinite}
-  .status-pill .eq span:nth-child(2){animation-delay:.18s}
-  .status-pill .eq span:nth-child(3){animation-delay:.36s}
-  .status-pill .seed{width:8px;height:8px;border-radius:50%;background:currentColor;flex-shrink:0}
+  .status-pill .eq span:nth-child(2){animation-delay:.18s}.status-pill .eq span:nth-child(3){animation-delay:.36s}
   @keyframes eq{0%,100%{height:4px}50%{height:13px}}
-  .status-pill[data-state="rec"]{background:var(--coral-tint);color:var(--coral);border-color:transparent}
-  .status-pill[data-state="rec"] .seed{display:none}
-  .status-pill[data-state="rec"] .eq{display:flex}
-  .status-pill[data-state="demo"]{background:rgba(43,212,188,.14);color:var(--teal-bright);border-color:transparent}
-  .status-pill[data-state="demo"] .seed{display:none}
-  .status-pill[data-state="demo"] .eq{display:flex}
+  .status-pill[data-state="rec"]{background:var(--rec-tint);color:var(--rec);border-color:transparent}
+  .status-pill[data-state="rec"] .seed{display:none}.status-pill[data-state="rec"] .eq{display:flex}
+  .status-pill[data-state="demo"]{background:var(--amber-tint);color:var(--amber-deep);border-color:transparent}
+  .status-pill[data-state="demo"] .seed{display:none}.status-pill[data-state="demo"] .eq{display:flex}
 
-  .icon-btn{
-    width:36px;height:36px;border-radius:9px;display:grid;place-items:center;
-    color:var(--bar-muted);transition:.18s;
-  }
-  .icon-btn:hover{background:var(--bar-2);color:var(--bar-ink)}
+  .icon-btn{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;color:var(--muted);transition:.18s;border:1px solid transparent}
+  .icon-btn:hover{background:var(--page-2);color:var(--ink);border-color:var(--line)}
   .icon-btn svg{width:18px;height:18px}
 
-  /* ============ MAIN GRID ============ */
-  .main{
-    display:grid;
-    grid-template-columns:1fr 380px;
-    gap:14px;
-    padding:14px;
-    overflow:hidden;
-    min-height:0;
-  }
-
-  .panel{
-    background:var(--surface);
-    border:1px solid var(--line);
-    border-radius:var(--r);
-    box-shadow:var(--shadow);
-    display:flex;flex-direction:column;
-    overflow:hidden;min-height:0;
-  }
-  .panel-head{
-    display:flex;align-items:center;gap:12px;
-    padding:14px 18px;border-bottom:1px solid var(--line);flex-shrink:0;
-  }
-  .panel-eyebrow{display:flex;align-items:center;gap:9px}
-  .panel-eyebrow h2{
-    font-family:var(--ff-display);font-weight:700;font-size:15px;
-    letter-spacing:-.01em;margin:0;
-  }
-  .badge-live{
-    display:none;align-items:center;gap:5px;font-size:10.5px;font-weight:700;
-    text-transform:uppercase;letter-spacing:.07em;color:var(--coral);
-    background:var(--coral-tint);padding:3px 8px;border-radius:6px;
-  }
+  /* ============ MAIN ============ */
+  .main{display:grid;grid-template-columns:1fr 384px;gap:16px;padding:16px;overflow:hidden;min-height:0}
+  .panel{background:var(--page);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;min-height:0;position:relative}
+  .panel-head{display:flex;align-items:center;gap:12px;padding:15px 20px;border-bottom:1px solid var(--line);flex-shrink:0}
+  .panel-eyebrow{display:flex;align-items:center;gap:10px}
+  .panel-icon{width:30px;height:30px;border-radius:9px;background:var(--amber-tint);color:var(--amber-deep);display:grid;place-items:center;flex-shrink:0}
+  .panel-icon svg{width:17px;height:17px}
+  .panel-eyebrow h2{font-family:var(--ff-display);font-weight:600;font-size:17px;margin:0;letter-spacing:-.01em}
+  .badge-live{display:none;align-items:center;gap:5px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--rec);background:var(--rec-tint);padding:4px 9px;border-radius:7px}
   .badge-live.on{display:inline-flex}
-  .badge-live .pulse{width:6px;height:6px;border-radius:50%;background:var(--coral);animation:pulse 1.4s ease-in-out infinite}
+  .badge-live .pulse{width:6px;height:6px;border-radius:50%;background:var(--rec);animation:pulse 1.4s ease-in-out infinite}
   @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
 
   .panel-tools{margin-left:auto;display:flex;align-items:center;gap:6px}
-  .tool{
-    display:flex;align-items:center;gap:6px;
-    font-size:12.5px;font-weight:500;color:var(--muted);
-    padding:6px 10px;border-radius:8px;transition:.16s;border:1px solid transparent;
-  }
-  .tool:hover{background:var(--surface-2);color:var(--ink);border-color:var(--line)}
+  .tool{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--muted);padding:7px 11px;border-radius:9px;transition:.16s;border:1px solid transparent}
+  .tool:hover{background:var(--page-2);color:var(--ink);border-color:var(--line)}
   .tool svg{width:15px;height:15px}
-  .tool:disabled{opacity:.4;cursor:not-allowed}
 
-  /* ---- Transcript ---- */
-  .tx-body{flex:1;overflow-y:auto;padding:10px 8px 22px;scroll-behavior:smooth}
-  .tx-body::-webkit-scrollbar{width:9px}
-  .tx-body::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:10px;border:3px solid var(--surface)}
-  .tx-body::-webkit-scrollbar-thumb:hover{background:#bcc6c2}
-
-  .seg{
-    display:grid;grid-template-columns:60px 1fr;gap:4px 12px;
-    padding:13px 16px;border-radius:12px;margin:1px 4px;
-    animation:segIn .42s cubic-bezier(.16,.84,.44,1) both;
+  /* ---- Transcript (trang giấy chấm bi) ---- */
+  .tx-body{
+    flex:1;overflow-y:auto;padding:14px 10px 26px;scroll-behavior:smooth;
+    background-image:radial-gradient(circle, var(--dot) 1.1px, transparent 1.3px);
+    background-size:22px 22px;background-position:14px 12px;
   }
-  .seg:hover{background:var(--surface-2)}
-  .seg.active{background:linear-gradient(90deg,var(--teal-tint) 0%,rgba(226,240,237,.25) 100%)}
+  .tx-body::-webkit-scrollbar{width:10px}
+  .tx-body::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:10px;border:3px solid var(--page)}
+  .tx-body::-webkit-scrollbar-thumb:hover{background:#c3cabf}
+
+  .seg{display:grid;grid-template-columns:62px 1fr;gap:4px 13px;padding:14px 16px;border-radius:14px;margin:2px 6px;animation:segIn .42s cubic-bezier(.16,.84,.44,1) both}
+  .seg:hover{background:var(--page-2)}
+  .seg.active{background:linear-gradient(90deg,var(--amber-tint) 0%, rgba(253,241,220,.35) 100%);box-shadow:inset 3px 0 0 var(--amber-bright)}
   @keyframes segIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
 
-  .seg-gutter{grid-row:1 / span 2;display:flex;flex-direction:column;align-items:center;gap:7px;padding-top:2px}
+  .seg-gutter{grid-row:1 / span 2;display:flex;flex-direction:column;align-items:center;gap:8px;padding-top:2px}
   .seg-time{font-family:var(--ff-mono);font-size:11px;color:var(--faint);white-space:nowrap;letter-spacing:-.02em}
-  .seg-avatar{
-    width:26px;height:26px;border-radius:8px;display:grid;place-items:center;
-    font-size:11px;font-weight:700;color:#fff;font-family:var(--ff-display);
-  }
-  .seg-speaker{font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:1px}
+  .seg-avatar{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff;font-family:var(--ff-body)}
+  .seg-speaker{font-size:12px;font-weight:800;color:var(--muted);margin-bottom:2px}
 
   .seg-line{display:flex;gap:9px;align-items:flex-start}
-  .seg-line.src{margin-bottom:5px}
-  .chip{
-    font-family:var(--ff-mono);font-size:10px;font-weight:500;letter-spacing:.02em;
-    padding:2.5px 6px;border-radius:5px;flex-shrink:0;margin-top:2px;line-height:1;
-  }
-  .chip.src{background:var(--surface-2);color:var(--faint);border:1px solid var(--line)}
-  .chip.tgt{background:var(--teal-tint);color:var(--teal);border:1px solid var(--teal-tint-2)}
-  .seg-text{font-size:14.5px;line-height:1.55;color:var(--muted)}
-  .seg-text.tgt{color:var(--ink);font-weight:500;font-size:15px}
-  .caret{display:inline-block;width:2px;height:1.05em;background:var(--teal);margin-left:2px;vertical-align:text-bottom;animation:blink 1s step-end infinite;border-radius:1px}
+  .seg-line.src{margin-bottom:6px}
+  .chip{font-family:var(--ff-mono);font-size:10px;font-weight:500;padding:3px 7px;border-radius:6px;flex-shrink:0;margin-top:2px;line-height:1}
+  .chip.src{background:var(--page-2);color:var(--faint);border:1px solid var(--line-strong)}
+  .chip.tgt{background:var(--amber-tint);color:var(--amber-deep);border:1px solid var(--amber-tint-2)}
+  .seg-text{font-size:14.5px;line-height:1.6;color:var(--muted)}
+  .seg-text.tgt{color:var(--ink);font-weight:700;font-size:15.5px}
+  .seg.active .seg-text.tgt{background:linear-gradient(180deg,transparent 58%, var(--hl) 58%, var(--hl) 92%, transparent 92%);padding:0 2px;border-radius:2px}
+  .caret{display:inline-block;width:2px;height:1.05em;background:var(--amber);margin-left:2px;vertical-align:text-bottom;animation:blink 1s step-end infinite;border-radius:1px}
   @keyframes blink{50%{opacity:0}}
-  .shimmer{
-    display:inline-block;height:13px;width:120px;border-radius:6px;vertical-align:middle;
-    background:linear-gradient(90deg,var(--surface-2) 25%,#eef2f0 50%,var(--surface-2) 75%);
-    background-size:200% 100%;animation:sh 1.3s infinite;
-  }
+  .shimmer{display:inline-block;height:14px;width:130px;border-radius:6px;vertical-align:middle;background:linear-gradient(90deg,var(--page-2) 25%,#eef2ec 50%,var(--page-2) 75%);background-size:200% 100%;animation:sh 1.3s infinite}
   @keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-  /* interim live line at bottom of transcript */
-  .tx-interim{
-    margin:2px 8px 0;padding:11px 16px;border-radius:12px;
-    background:var(--teal-tint);border:1px dashed var(--teal-tint-2);
-    display:none;align-items:flex-start;gap:9px;
-  }
+  .tx-interim{margin:2px 10px 0;padding:12px 16px;border-radius:14px;background:var(--amber-tint);border:1px dashed var(--amber-tint-2);display:none;align-items:flex-start;gap:9px}
   .tx-interim.on{display:flex}
-  .tx-interim .seg-text{color:var(--teal-deep);font-style:italic}
+  .tx-interim .seg-text{color:var(--amber-deep);font-style:italic;font-weight:600}
 
-  /* Empty state */
-  .empty{
-    height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    text-align:center;padding:30px;gap:6px;
-  }
-  .empty-art{
-    width:64px;height:64px;border-radius:18px;margin-bottom:8px;
-    background:var(--teal-tint);display:grid;place-items:center;color:var(--teal);
-    box-shadow:0 0 0 8px rgba(226,240,237,.45);
-  }
-  .empty-art svg{width:30px;height:30px}
-  .empty h3{font-family:var(--ff-display);font-weight:700;font-size:19px;margin:4px 0 0;letter-spacing:-.01em}
-  .empty p{font-size:13.5px;color:var(--muted);margin:0;max-width:330px;line-height:1.5}
-  .empty-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;justify-content:center}
+  /* Empty state minh hoạ */
+  .empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;gap:6px}
+  .empty-art{margin-bottom:10px;position:relative}
+  .empty-art svg{width:108px;height:auto;display:block}
+  .empty h3{font-family:var(--ff-display);font-weight:600;font-size:22px;margin:6px 0 0;letter-spacing:-.01em}
+  .empty p{font-size:14px;color:var(--muted);margin:0;max-width:360px;line-height:1.55;font-weight:500}
+  .empty p b{color:var(--ink)}
+  .empty-actions{display:flex;gap:11px;margin-top:16px;flex-wrap:wrap;justify-content:center}
 
-  .btn{
-    display:inline-flex;align-items:center;gap:8px;
-    font-size:13.5px;font-weight:600;padding:10px 16px;border-radius:10px;
-    transition:.16s;white-space:nowrap;
-  }
-  .btn svg{width:16px;height:16px}
-  .btn-primary{background:var(--teal);color:#fff;box-shadow:0 2px 8px rgba(11,110,99,.28)}
-  .btn-primary:hover{background:var(--teal-deep);transform:translateY(-1px);box-shadow:0 6px 16px rgba(11,110,99,.32)}
-  .btn-ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line-strong)}
-  .btn-ghost:hover{background:var(--surface-2);border-color:var(--faint)}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:800;padding:11px 18px;border-radius:12px;transition:.16s;white-space:nowrap}
+  .btn svg{width:17px;height:17px}
+  .btn-primary{background:var(--amber-btn);color:#fff;box-shadow:0 3px 10px rgba(178,105,5,.3)}
+  .btn-primary:hover{background:var(--amber-btn-h);transform:translateY(-1px);box-shadow:0 7px 18px rgba(178,105,5,.34)}
+  .btn-ghost{background:var(--page);color:var(--ink);border:1.5px solid var(--line-strong)}
+  .btn-ghost:hover{background:var(--page-2);border-color:var(--faint)}
 
-  /* ---- Insights ---- */
-  .in-tabs{display:flex;gap:2px;padding:10px 12px 0;flex-shrink:0;border-bottom:1px solid var(--line)}
-  .in-tab{
-    font-size:13px;font-weight:600;color:var(--faint);
-    padding:9px 13px 12px;border-radius:8px 8px 0 0;position:relative;transition:.16s;
-    display:flex;align-items:center;gap:7px;
-  }
-  .in-tab:hover{color:var(--muted)}
-  .in-tab.active{color:var(--teal)}
-  .in-tab.active::after{content:"";position:absolute;left:10px;right:10px;bottom:-1px;height:2.5px;background:var(--teal);border-radius:3px}
-  .in-tab .count{font-family:var(--ff-mono);font-size:10px;background:var(--surface-2);color:var(--muted);padding:1px 6px;border-radius:20px}
-  .in-tab.active .count{background:var(--teal-tint);color:var(--teal)}
+  /* ---- Insights: tab kiểu giấy phân trang ---- */
+  .in-tabs{display:flex;gap:5px;padding:12px 14px 0;flex-shrink:0;border-bottom:1px solid var(--line);background:var(--page-2)}
+  .in-tab{font-size:13px;font-weight:800;color:var(--faint);padding:10px 14px;border-radius:11px 11px 0 0;position:relative;transition:.16s;display:flex;align-items:center;gap:8px;border:1px solid transparent;border-bottom:none;top:1px}
+  .in-tab:hover{color:var(--muted);background:rgba(255,255,255,.6)}
+  .in-tab.active{color:var(--amber-deep);background:var(--page);border-color:var(--line)}
+  .in-tab.active::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--amber-bright);border-radius:11px 11px 0 0}
+  .in-tab .count{font-family:var(--ff-mono);font-size:10px;background:var(--line);color:var(--muted);padding:1px 7px;border-radius:20px}
+  .in-tab.active .count{background:var(--amber-tint);color:var(--amber-deep)}
 
-  .in-body{flex:1;overflow-y:auto;padding:18px}
-  .in-body::-webkit-scrollbar{width:9px}
-  .in-body::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:10px;border:3px solid var(--surface)}
+  .in-body{flex:1;overflow-y:auto;padding:20px}
+  .in-body::-webkit-scrollbar{width:10px}
+  .in-body::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:10px;border:3px solid var(--page)}
   .in-pane{display:none}
   .in-pane.active{display:block;animation:fade .3s ease both}
   @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
-  .in-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:34px 16px;gap:8px;height:100%}
-  .in-empty svg{width:34px;height:34px;color:var(--line-strong)}
-  .in-empty p{font-size:13px;color:var(--faint);margin:0;line-height:1.5;max-width:240px}
+  .in-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 16px;gap:10px;height:100%}
+  .in-empty .ico{width:52px;height:52px;border-radius:15px;background:var(--page-2);border:1px solid var(--line);display:grid;place-items:center;color:var(--line-strong)}
+  .in-empty .ico svg{width:26px;height:26px}
+  .in-empty p{font-size:13px;color:var(--faint);margin:0;line-height:1.55;max-width:250px;font-weight:600}
 
-  .gen-btn{width:100%;justify-content:center;margin-top:6px}
-  .gen-btn.spinning{pointer-events:none;opacity:.85}
+  .gen-btn{width:100%;justify-content:center;margin-top:4px}
+  .gen-btn.spinning{pointer-events:none;opacity:.9}
   .spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
 
-  .sum-section{margin-bottom:20px}
-  .sum-label{
-    font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
-    color:var(--faint);margin-bottom:10px;display:flex;align-items:center;gap:7px;
-  }
-  .sum-label svg{width:13px;height:13px;color:var(--teal)}
-  .sum-point{
-    display:flex;gap:10px;font-size:13.5px;line-height:1.55;color:var(--ink);
-    margin-bottom:10px;animation:segIn .4s both;
-  }
-  .sum-point .bullet{width:5px;height:5px;border-radius:50%;background:var(--teal);margin-top:8px;flex-shrink:0}
+  .sum-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin:0 0 12px;display:flex;align-items:center;gap:8px}
+  .sum-label svg{width:14px;height:14px;color:var(--amber)}
+  .sum-point{display:flex;gap:11px;font-size:14px;line-height:1.6;color:var(--ink);margin-bottom:11px;font-weight:500;animation:segIn .4s both}
+  .sum-point .bullet{width:6px;height:6px;border-radius:50%;background:var(--amber-bright);margin-top:9px;flex-shrink:0}
 
-  .action-item{
-    display:flex;gap:10px;align-items:flex-start;padding:11px 12px;
-    background:var(--surface-2);border:1px solid var(--line);border-radius:10px;
-    margin-bottom:8px;transition:.16s;animation:segIn .4s both;
-  }
-  .action-item:hover{border-color:var(--teal-tint-2)}
-  .action-check{
-    width:18px;height:18px;border-radius:6px;border:1.5px solid var(--line-strong);
-    flex-shrink:0;margin-top:1px;cursor:pointer;transition:.16s;display:grid;place-items:center;
-  }
-  .action-check svg{width:11px;height:11px;color:#fff;opacity:0;transition:.16s}
-  .action-item.done .action-check{background:var(--teal);border-color:var(--teal)}
-  .action-item.done .action-check svg{opacity:1}
-  .action-item.done .action-text{text-decoration:line-through;color:var(--faint)}
-  .action-text{font-size:13.5px;line-height:1.5}
-  .action-text .who{font-weight:600;color:var(--teal-deep)}
+  /* Bài tập */
+  .hw-item{display:flex;gap:11px;align-items:flex-start;padding:13px;background:var(--page-2);border:1px solid var(--line);border-radius:13px;margin-bottom:9px;transition:.16s;animation:segIn .4s both}
+  .hw-item:hover{border-color:var(--amber-tint-2)}
+  .hw-check{width:20px;height:20px;border-radius:7px;border:2px solid var(--line-strong);flex-shrink:0;margin-top:1px;cursor:pointer;transition:.16s;display:grid;place-items:center}
+  .hw-check svg{width:12px;height:12px;color:#fff;opacity:0;transition:.16s}
+  .hw-item.done .hw-check{background:var(--ok);border-color:var(--ok)}
+  .hw-item.done .hw-check svg{opacity:1}
+  .hw-item.done .hw-text{text-decoration:line-through;color:var(--faint)}
+  .hw-text{font-size:14px;line-height:1.5;font-weight:600}
+  .hw-text .who{font-weight:800;color:var(--amber-deep)}
 
-  .term{
-    display:inline-flex;align-items:center;gap:7px;
-    font-size:12.5px;font-weight:500;
-    background:var(--surface-2);border:1px solid var(--line);
-    padding:6px 11px;border-radius:8px;margin:0 6px 8px 0;
+  /* Từ vựng — flashcard */
+  .vocab-grid{display:flex;flex-direction:column;gap:10px}
+  .vcard{
+    border:1px solid var(--line);border-radius:14px;padding:13px 15px;background:var(--page);
+    box-shadow:var(--shadow-sm);transition:.16s;animation:segIn .4s both;position:relative;overflow:hidden;
   }
-  .term .cnt{font-family:var(--ff-mono);font-size:10px;color:var(--faint)}
-  .term-list{display:flex;flex-wrap:wrap}
+  .vcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--amber-bright)}
+  .vcard:hover{transform:translateY(-1px);border-color:var(--amber-tint-2)}
+  .vcard-top{display:flex;align-items:center;gap:9px;margin-bottom:5px}
+  .vterm{font-family:var(--ff-display);font-weight:600;font-size:17px;color:var(--ink);letter-spacing:-.01em}
+  .vspeak{width:28px;height:28px;border-radius:8px;background:var(--amber-tint);color:var(--amber-deep);display:grid;place-items:center;transition:.16s;flex-shrink:0;margin-left:auto}
+  .vspeak:hover{background:var(--amber-tint-2)}
+  .vspeak svg{width:15px;height:15px}
+  .vmean{font-size:13.5px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:7px}
+  .vmean .arrow{color:var(--amber);font-weight:800}
 
   /* ============ CONTROL BAR ============ */
-  .cb{
-    background:var(--bar);
-    border-top:1px solid var(--bar-line);
-    padding:0 18px;height:72px;
-    display:flex;align-items:center;gap:14px;
-  }
-  .cb-rec{display:flex;align-items:center;gap:12px;flex-shrink:0}
-  .rec-btn{
-    width:48px;height:48px;border-radius:14px;display:grid;place-items:center;
-    background:var(--teal);color:#fff;transition:.18s;flex-shrink:0;
-    box-shadow:0 4px 14px rgba(11,110,99,.4);
-  }
-  .rec-btn svg{width:21px;height:21px}
-  .rec-btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(11,110,99,.5)}
-  .rec-btn.recording{background:var(--coral);box-shadow:0 4px 14px rgba(255,90,77,.45)}
-  .rec-btn.recording:hover{box-shadow:0 8px 20px rgba(255,90,77,.55)}
-  .rec-btn.recording svg.mic{display:none}
-  .rec-btn svg.stop{display:none}
-  .rec-btn.recording svg.stop{display:block}
-  .rec-label{display:flex;flex-direction:column;gap:1px}
-  .rec-label .t{font-size:13px;font-weight:600;color:var(--bar-ink)}
-  .rec-label .s{font-size:11px;color:var(--bar-muted)}
+  .cb{background:var(--page);border-top:1px solid var(--line);padding:0 20px;height:78px;display:flex;align-items:center;gap:16px;flex-shrink:0}
+  .cb-rec{display:flex;align-items:center;gap:13px;flex-shrink:0}
+  .rec-btn{width:50px;height:50px;border-radius:15px;display:grid;place-items:center;background:var(--amber-btn);color:#fff;transition:.18s;flex-shrink:0;box-shadow:0 4px 14px rgba(178,105,5,.4)}
+  .rec-btn svg{width:22px;height:22px}
+  .rec-btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(178,105,5,.48)}
+  .rec-btn.recording{background:var(--rec);box-shadow:0 4px 14px rgba(229,72,77,.42)}
+  .rec-btn.recording:hover{box-shadow:0 8px 20px rgba(229,72,77,.5)}
+  .rec-btn.recording svg.mic{display:none}.rec-btn svg.stop{display:none}.rec-btn.recording svg.stop{display:block}
+  .rec-label{display:flex;flex-direction:column;gap:2px}
+  .rec-label .t{font-size:13.5px;font-weight:800;color:var(--ink)}
+  .rec-label .s{font-size:11.5px;color:var(--muted);font-weight:600}
 
-  .cb-langs{
-    display:flex;align-items:center;gap:8px;flex-shrink:0;
-    background:var(--bar-2);border:1px solid var(--bar-line);border-radius:12px;padding:5px;
-  }
+  .cb-langs{display:flex;align-items:center;gap:7px;flex-shrink:0;background:var(--page-2);border:1px solid var(--line);border-radius:14px;padding:5px}
   .lang-select{position:relative}
-  .lang-select select{
-    appearance:none;-webkit-appearance:none;
-    font-family:var(--ff-body);font-size:13px;font-weight:600;color:var(--bar-ink);
-    background:transparent;border:none;padding:8px 30px 8px 12px;border-radius:8px;cursor:pointer;
-  }
-  .lang-select select:hover{background:var(--bar)}
-  .lang-select select:focus{outline:none;box-shadow:0 0 0 1.5px var(--teal-bright)}
-  .lang-select select option{background:var(--bar-2);color:var(--bar-ink)}
-  .lang-select .chev{position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--bar-muted)}
+  .lang-select select{appearance:none;-webkit-appearance:none;font-family:var(--ff-body);font-size:13.5px;font-weight:800;color:var(--ink);background:transparent;border:none;padding:9px 30px 9px 13px;border-radius:10px;cursor:pointer}
+  .lang-select select:hover{background:var(--page)}
+  .lang-select select:focus{outline:none;box-shadow:0 0 0 2px var(--amber-tint-2)}
+  .lang-select .chev{position:absolute;right:11px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--faint)}
   .lang-select .chev svg{width:13px;height:13px;display:block}
-  .lang-select .flag{display:none}
-  .swap-btn{
-    width:30px;height:30px;border-radius:8px;display:grid;place-items:center;
-    color:var(--teal-bright);transition:.2s;flex-shrink:0;
-  }
-  .swap-btn:hover{background:var(--bar);transform:rotate(180deg)}
+  .swap-btn{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;color:var(--amber);transition:.2s;flex-shrink:0}
+  .swap-btn:hover{background:var(--page);transform:rotate(180deg)}
   .swap-btn svg{width:16px;height:16px}
 
-  .cb-wave{display:flex;align-items:center;gap:12px;margin-left:auto;flex-shrink:0}
-  .wave-canvas{width:130px;height:34px;display:block}
-  .cb-stat{display:flex;flex-direction:column;align-items:flex-end;gap:1px}
-  .cb-stat .n{font-family:var(--ff-mono);font-size:15px;font-weight:500;color:var(--bar-ink);line-height:1}
-  .cb-stat .l{font-size:10px;color:var(--bar-muted);text-transform:uppercase;letter-spacing:.06em}
-
-  .demo-btn{
-    display:flex;align-items:center;gap:8px;flex-shrink:0;
-    font-size:13px;font-weight:600;color:var(--teal-bright);
-    padding:9px 14px;border-radius:10px;border:1px solid var(--bar-line);
-    background:var(--bar-2);transition:.16s;
-  }
-  .demo-btn:hover{background:var(--bar);border-color:var(--teal-bright)}
+  .demo-btn{display:flex;align-items:center;gap:8px;flex-shrink:0;font-size:13.5px;font-weight:800;color:var(--amber-deep);padding:10px 15px;border-radius:12px;border:1.5px solid var(--amber-tint-2);background:var(--amber-tint);transition:.16s}
+  .demo-btn:hover{background:var(--amber-tint-2)}
   .demo-btn svg{width:15px;height:15px}
-  .demo-btn.playing{color:var(--coral);border-color:var(--coral)}
-  .demo-btn.playing svg.play{display:none}
-  .demo-btn svg.stopdemo{display:none}
-  .demo-btn.playing svg.stopdemo{display:block}
+  .demo-btn.playing{color:var(--rec);border-color:#f5c2c4;background:var(--rec-tint)}
+  .demo-btn.playing svg.play{display:none}.demo-btn svg.stopdemo{display:none}.demo-btn.playing svg.stopdemo{display:block}
+
+  .cb-wave{display:flex;align-items:center;gap:13px;margin-left:auto;flex-shrink:0}
+  .wave-canvas{width:132px;height:36px;display:block}
+  .cb-stat{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+  .cb-stat .n{font-family:var(--ff-mono);font-size:16px;font-weight:500;color:var(--ink);line-height:1}
+  .cb-stat .l{font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
 
   /* Toast */
-  .toast{
-    position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);
-    background:var(--ink);color:#fff;font-size:13px;font-weight:500;
-    padding:11px 18px;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.25);
-    opacity:0;pointer-events:none;transition:.3s;z-index:100;display:flex;align-items:center;gap:9px;
-  }
+  .toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;font-size:13.5px;font-weight:700;padding:12px 19px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:.3s;z-index:100;display:flex;align-items:center;gap:9px;max-width:90vw}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-  .toast svg{width:16px;height:16px;color:var(--teal-bright)}
-
-  /* Mobile help banner */
-  .mobile-note{display:none}
+  .toast svg{width:16px;height:16px;color:var(--amber-bright);flex-shrink:0}
 
   /* ============ RESPONSIVE ============ */
   @media (max-width:980px){
     .app{height:auto;min-height:100dvh;overflow:visible}
-    .main{grid-template-columns:1fr;overflow:visible;gap:14px}
+    .main{grid-template-columns:1fr;overflow:visible;gap:16px}
     .panel{min-height:380px}
     .tx-body{max-height:55vh}
-    .tb-sub{display:none}
   }
   @media (max-width:680px){
-    .tb{height:auto;padding:10px 14px;flex-wrap:wrap;gap:10px}
+    .tb{height:auto;padding:11px 15px;flex-wrap:wrap;gap:11px}
     .tb-meta{order:3;width:100%;flex-basis:100%}
     .tb-divider{display:none}
     .tb-title{max-width:none}
     .tb-clock .lbl{display:none}
-    .cb{height:auto;flex-wrap:wrap;padding:12px 14px;gap:10px}
+    .cb{height:auto;flex-wrap:wrap;padding:13px 15px;gap:11px}
     .cb-wave{margin-left:0;width:100%;justify-content:space-between;order:5}
     .cb-langs{flex:1}
-    .main{padding:12px}
     .demo-btn{flex:1;justify-content:center}
+    .main{padding:13px}
   }
   @media (prefers-reduced-motion:reduce){
     *{animation-duration:.001ms !important;transition-duration:.05ms !important}
@@ -439,25 +320,26 @@
   <header class="tb">
     <div class="tb-brand">
       <div class="tb-logo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#06302b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 5h7M6.5 3v2c0 4-2 6-3.5 6"/><path d="M5 11c2 2 4 2 5.5 1"/>
-          <path d="M13 20l4-9 4 9M14.5 17h5"/>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#4a2a02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 5.5A1.5 1.5 0 0 1 4.5 4H11v15H4.5A1.5 1.5 0 0 1 3 17.5z" fill="#fff" stroke="#4a2a02"/>
+          <path d="M21 5.5A1.5 1.5 0 0 0 19.5 4H13v15h6.5A1.5 1.5 0 0 0 21 17.5z" fill="#fff" stroke="#4a2a02"/>
+          <path d="M12 4v15"/><path d="M6 8h3M6 11h3M15 8h3M15 11h3"/>
         </svg>
       </div>
-      <div class="tb-name">Lingor<span class="dot">a</span></div>
+      <div class="tb-wm">
+        <div class="tb-name">Lingor<span class="x">a</span></div>
+        <div class="tb-tag">Học · Dịch · Ghi chú</div>
+      </div>
     </div>
 
     <div class="tb-divider"></div>
 
     <div class="tb-meta">
-      <div class="tb-title-wrap">
-        <input class="tb-title" id="meetingTitle" value="Sprint Review — Team SEAL" aria-label="Tên cuộc họp">
-        <div class="tb-sub">
-          <span id="meetingDate" class="mono"></span>
-          <span>·</span>
-          <span id="langPairLabel">EN → VI</span>
-        </div>
+      <div class="tb-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        Buổi học
       </div>
+      <input class="tb-title" id="meetingTitle" value="Functions in Programming — Lesson 3" aria-label="Tên buổi học">
     </div>
 
     <div class="tb-right">
@@ -466,11 +348,8 @@
         <span class="eq"><span></span><span></span><span></span></span>
         <span id="statusText">Sẵn sàng</span>
       </div>
-      <div class="tb-clock">
-        <span class="lbl">Thời lượng</span>
-        <span id="clock">00:00</span>
-      </div>
-      <button class="icon-btn" id="exportBtn" title="Tải transcript (.txt)" aria-label="Tải transcript">
+      <div class="tb-clock"><span class="lbl">Thời lượng</span><span id="clock">00:00</span></div>
+      <button class="icon-btn" id="exportBtn" title="Tải ghi chú (.txt)" aria-label="Tải ghi chú">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       </button>
       <button class="icon-btn" id="settingsBtn" title="Cài đặt" aria-label="Cài đặt">
@@ -486,35 +365,48 @@
     <section class="panel">
       <div class="panel-head">
         <div class="panel-eyebrow">
-          <h2>Phụ đề trực tiếp</h2>
+          <div class="panel-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></div>
+          <h2>Phụ đề bài giảng</h2>
           <span class="badge-live" id="txLive"><span class="pulse"></span>Live</span>
         </div>
         <div class="panel-tools">
           <button class="tool" id="autoscrollBtn" title="Tự cuộn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
-            Tự cuộn
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>Tự cuộn
           </button>
-          <button class="tool" id="clearBtn" title="Xoá & bắt đầu phiên mới">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-            Phiên mới
+          <button class="tool" id="clearBtn" title="Xoá & bắt đầu buổi mới">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Buổi mới
           </button>
         </div>
       </div>
       <div class="tx-body" id="txBody" aria-live="polite">
         <div class="empty" id="txEmpty">
           <div class="empty-art">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+            <svg viewBox="0 0 140 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="70" cy="86" rx="48" ry="6" fill="#283139" opacity="0.06"/>
+              <!-- book -->
+              <path d="M70 26C58 18 40 18 28 22v54c12-4 30-4 42 4 12-8 30-8 42-4V22c-12-4-30-4-42 4z" fill="#fff" stroke="#283139" stroke-width="2.4" stroke-linejoin="round"/>
+              <path d="M70 26v54" stroke="#283139" stroke-width="2.4"/>
+              <path d="M37 34c8-2 18-2 24 1M37 44c8-2 18-2 24 1M37 54c8-2 16-2 22 1" stroke="#C7CFC4" stroke-width="2.2" stroke-linecap="round"/>
+              <path d="M79 35c8-3 18-3 24-1M79 45c8-3 18-3 24-1M79 55c6-2 14-2 20-1" stroke="#C7CFC4" stroke-width="2.2" stroke-linecap="round"/>
+              <!-- pencil -->
+              <g transform="rotate(38 104 28)">
+                <rect x="96" y="6" width="10" height="42" rx="2" fill="#F6A623" stroke="#283139" stroke-width="2.2"/>
+                <path d="M96 6h10l-5-7z" fill="#283139"/>
+                <path d="M96 42h10v4l-5 5-5-5z" fill="#FBE2A0" stroke="#283139" stroke-width="2.2"/>
+                <path d="M96 14h10" stroke="#283139" stroke-width="1.6"/>
+              </g>
+              <!-- sparkle -->
+              <path d="M28 14l1.6 4.4L34 20l-4.4 1.6L28 26l-1.6-4.4L22 20l4.4-1.6z" fill="#F6A623"/>
+            </svg>
           </div>
-          <h3>Chưa có nội dung</h3>
-          <p>Nhấn <b>Phát demo</b> để xem bản dịch mẫu, hoặc <b>Bắt đầu ghi</b> để dịch giọng nói của bạn theo thời gian thực.</p>
+          <h3>Bắt đầu buổi học</h3>
+          <p>Nhấn <b>Phát demo</b> để xem một bài giảng mẫu được dịch trực tiếp, hoặc <b>Bắt đầu ghi</b> để dịch &amp; ghi chú bài giảng của bạn theo thời gian thực.</p>
           <div class="empty-actions">
             <button class="btn btn-primary" id="emptyDemo">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-              Phát demo
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Phát demo
             </button>
             <button class="btn btn-ghost" id="emptyMic">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
-              Bắt đầu ghi
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>Bắt đầu ghi
             </button>
           </div>
         </div>
@@ -528,38 +420,38 @@
     <!-- Insights -->
     <aside class="panel">
       <div class="in-tabs">
-        <button class="in-tab active" data-tab="summary">Tóm tắt</button>
-        <button class="in-tab" data-tab="actions">Việc cần làm <span class="count" id="actCount">0</span></button>
-        <button class="in-tab" data-tab="terms">Thuật ngữ</button>
+        <button class="in-tab active" data-tab="summary">Tóm tắt bài học</button>
+        <button class="in-tab" data-tab="vocab">Từ vựng <span class="count" id="vocabCount">0</span></button>
+        <button class="in-tab" data-tab="homework">Bài tập <span class="count" id="hwCount">0</span></button>
       </div>
       <div class="in-body">
 
         <div class="in-pane active" id="pane-summary">
           <div id="summaryEmpty" class="in-empty">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-            <p>Tóm tắt cuộc họp sẽ xuất hiện ở đây. Ghi hoặc phát demo rồi tạo tóm tắt.</p>
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+            <p>Tóm tắt nội dung bài giảng sẽ hiện ở đây. Hãy ghi hoặc phát demo rồi tạo tóm tắt.</p>
           </div>
           <div id="summaryContent" style="display:none"></div>
           <button class="btn btn-primary gen-btn" id="genBtn" style="display:none">
             <span class="gen-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/></svg></span>
-            <span class="gen-label">Tạo tóm tắt AI</span>
+            <span class="gen-label">Tạo tóm tắt bài học</span>
           </button>
         </div>
 
-        <div class="in-pane" id="pane-actions">
-          <div id="actionsEmpty" class="in-empty">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-            <p>Các đầu việc và quyết định được trích từ cuộc họp sẽ hiện ở đây.</p>
+        <div class="in-pane" id="pane-vocab">
+          <div id="vocabEmpty" class="in-empty">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+            <p>Từ vựng và thuật ngữ quan trọng (kèm nghĩa &amp; phát âm) sẽ xuất hiện ở đây.</p>
           </div>
-          <div id="actionsContent"></div>
+          <div id="vocabContent" class="vocab-grid"></div>
         </div>
 
-        <div class="in-pane" id="pane-terms">
-          <div id="termsEmpty" class="in-empty">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-            <p>Thuật ngữ và từ khoá quan trọng phát hiện trong cuộc họp.</p>
+        <div class="in-pane" id="pane-homework">
+          <div id="hwEmpty" class="in-empty">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+            <p>Bài tập về nhà và việc cần làm được trích từ bài giảng sẽ hiện ở đây.</p>
           </div>
-          <div id="termsContent" class="term-list"></div>
+          <div id="hwContent"></div>
         </div>
 
       </div>
@@ -575,20 +467,20 @@
       </button>
       <div class="rec-label">
         <span class="t" id="recTitle">Bắt đầu ghi</span>
-        <span class="s" id="recSub">Dịch giọng nói trực tiếp</span>
+        <span class="s" id="recSub">Dịch &amp; ghi chú bài giảng</span>
       </div>
     </div>
 
     <div class="cb-langs">
       <div class="lang-select">
-        <select id="srcLang" aria-label="Ngôn ngữ nguồn"></select>
+        <select id="srcLang" aria-label="Ngôn ngữ bài giảng"></select>
         <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
       </div>
       <button class="swap-btn" id="swapBtn" title="Đổi chiều dịch" aria-label="Đổi chiều dịch">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg>
       </button>
       <div class="lang-select">
-        <select id="tgtLang" aria-label="Ngôn ngữ đích"></select>
+        <select id="tgtLang" aria-label="Ngôn ngữ dịch sang"></select>
         <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
       </div>
     </div>
@@ -600,11 +492,8 @@
     </button>
 
     <div class="cb-wave">
-      <canvas class="wave-canvas" id="wave" width="260" height="68"></canvas>
-      <div class="cb-stat">
-        <span class="n" id="wordCount">0</span>
-        <span class="l">Từ</span>
-      </div>
+      <canvas class="wave-canvas" id="wave" width="264" height="72"></canvas>
+      <div class="cb-stat"><span class="n" id="wordCount">0</span><span class="l">Từ</span></div>
     </div>
   </footer>
 </div>
@@ -616,14 +505,13 @@
 
 <script>
 /* =========================================================
-   LINGORA — Live Meeting Translator & Summarizer
-   1 file HTML — deploy được lên mọi static host.
-   - Ghi giọng nói:  Web Speech API (Chrome/Edge, cần HTTPS)
-   - Dịch:           MyMemory API (free, không cần key)
-   - Tóm tắt:        demo có sẵn + extractive cơ bản (next step: LLM)
+   LINGORA STUDY — Dịch & ghi chú bài giảng (1 file HTML)
+   - Ghi giọng nói: Web Speech API (Chrome/Edge, cần HTTPS)
+   - Dịch:          MyMemory API (free, không cần key)
+   - Phát âm:       SpeechSynthesis (đọc từ vựng)
+   - Tóm tắt:       demo + extractive cơ bản (next step: LLM qua backend)
    ========================================================= */
 
-/* ---------- Danh sách ngôn ngữ ---------- */
 const LANGS = [
   {code:"en", bcp:"en-US", name:"English"},
   {code:"vi", bcp:"vi-VN", name:"Tiếng Việt"},
@@ -639,150 +527,79 @@ const LANGS = [
   {code:"hi", bcp:"hi-IN", name:"हिन्दी"},
 ];
 
-/* ---------- State ---------- */
-const state = {
-  mode:"idle",            // idle | recording | demo
-  seconds:0,
-  timerId:null,
-  segments:[],            // {time, speaker, color, srcCode, tgtCode, src, tgt}
-  autoscroll:true,
-  recognition:null,
-  audioCtx:null,
-  analyser:null,
-  micStream:null,
-};
+const state = {mode:"idle",seconds:0,timerId:null,segments:[],autoscroll:true,recognition:null,audioCtx:null,analyser:null,micStream:null};
 
-/* ---------- DOM refs ---------- */
 const $ = id => document.getElementById(id);
-const txBody=$("txBody"), txEmpty=$("txEmpty"), txInterim=$("txInterim"),
-      interimText=$("interimText"), interimChip=$("interimChip"),
-      statusPill=$("statusPill"), statusText=$("statusText"), clock=$("clock"),
-      recBtn=$("recBtn"), recTitle=$("recTitle"), recSub=$("recSub"),
-      demoBtn=$("demoBtn"), demoLabel=$("demoLabel"),
-      srcSel=$("srcLang"), tgtSel=$("tgtLang"), swapBtn=$("swapBtn"),
-      wordCount=$("wordCount"), txLive=$("txLive"), langPairLabel=$("langPairLabel"),
-      toast=$("toast"), toastText=$("toastText");
+const txBody=$("txBody"),txEmpty=$("txEmpty"),txInterim=$("txInterim"),interimText=$("interimText"),interimChip=$("interimChip"),
+      statusPill=$("statusPill"),statusText=$("statusText"),clock=$("clock"),
+      recBtn=$("recBtn"),recTitle=$("recTitle"),recSub=$("recSub"),
+      demoBtn=$("demoBtn"),demoLabel=$("demoLabel"),
+      srcSel=$("srcLang"),tgtSel=$("tgtLang"),swapBtn=$("swapBtn"),
+      wordCount=$("wordCount"),txLive=$("txLive"),toast=$("toast"),toastText=$("toastText");
 
-/* =========================================================
-   INIT
-   ========================================================= */
+/* ---------- INIT ---------- */
 function init(){
-  // populate language selects
-  LANGS.forEach(l=>{
-    srcSel.add(new Option(l.name, l.code));
-    tgtSel.add(new Option(l.name, l.code));
-  });
-  srcSel.value="en"; tgtSel.value="vi";
-  updateLangPair();
+  LANGS.forEach(l=>{srcSel.add(new Option(l.name,l.code));tgtSel.add(new Option(l.name,l.code));});
+  srcSel.value="en";tgtSel.value="vi";updateLangPair();
 
-  // meeting date
-  $("meetingDate").textContent = new Date().toLocaleDateString("vi-VN",{day:"2-digit",month:"2-digit",year:"numeric"});
+  recBtn.onclick=toggleRecording; $("emptyMic").onclick=toggleRecording;
+  demoBtn.onclick=toggleDemo;      $("emptyDemo").onclick=toggleDemo;
+  swapBtn.onclick=swapLangs;
+  srcSel.onchange=()=>{updateLangPair();restartRecognitionIfNeeded();};
+  tgtSel.onchange=updateLangPair;
+  $("clearBtn").onclick=clearSession;
+  $("exportBtn").onclick=exportTranscript;
+  $("genBtn").onclick=onGenerateSummary;
+  $("settingsBtn").onclick=()=>showToast("Cài đặt nâng cao sẽ có ở bản đầy đủ (next step).");
 
-  // events
-  recBtn.onclick = toggleRecording;
-  $("emptyMic").onclick = toggleRecording;
-  demoBtn.onclick = toggleDemo;
-  $("emptyDemo").onclick = toggleDemo;
-  swapBtn.onclick = swapLangs;
-  srcSel.onchange = ()=>{updateLangPair(); restartRecognitionIfNeeded();};
-  tgtSel.onchange = updateLangPair;
-  $("clearBtn").onclick = clearSession;
-  $("exportBtn").onclick = exportTranscript;
-  $("genBtn").onclick = onGenerateSummary;
-  $("settingsBtn").onclick = ()=>showToast("Cài đặt nâng cao sẽ có ở bản đầy đủ (next step).");
-
-  $("autoscrollBtn").onclick = (e)=>{
+  $("autoscrollBtn").onclick=(e)=>{
     state.autoscroll=!state.autoscroll;
-    e.currentTarget.style.color = state.autoscroll? "var(--teal)":"var(--muted)";
-    e.currentTarget.style.background = state.autoscroll? "var(--teal-tint)":"";
-    e.currentTarget.style.borderColor = state.autoscroll? "var(--teal-tint-2)":"transparent";
+    const b=e.currentTarget;
+    b.style.color=state.autoscroll?"var(--amber-deep)":"var(--muted)";
+    b.style.background=state.autoscroll?"var(--amber-tint)":"";
+    b.style.borderColor=state.autoscroll?"var(--amber-tint-2)":"transparent";
   };
-  $("autoscrollBtn").click(); // bật mặc định
+  $("autoscrollBtn").click();
 
-  // tabs
   document.querySelectorAll(".in-tab").forEach(t=>{
     t.onclick=()=>{
       document.querySelectorAll(".in-tab").forEach(x=>x.classList.remove("active"));
       document.querySelectorAll(".in-pane").forEach(x=>x.classList.remove("active"));
-      t.classList.add("active");
-      $("pane-"+t.dataset.tab).classList.add("active");
+      t.classList.add("active"); $("pane-"+t.dataset.tab).classList.add("active");
     };
   });
 
-  // detect speech support
   if(!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)){
-    recSub.textContent = "Mic cần Chrome/Edge (HTTPS)";
-    recBtn.style.opacity=".6";
+    recSub.textContent="Mic cần Chrome/Edge (HTTPS)"; recBtn.style.opacity=".6";
   }
-
   startWaveform();
 }
 
-/* =========================================================
-   NGÔN NGỮ
-   ========================================================= */
+/* ---------- NGÔN NGỮ ---------- */
 function langByCode(c){return LANGS.find(l=>l.code===c)}
-function updateLangPair(){
-  const s=langByCode(srcSel.value), t=langByCode(tgtSel.value);
-  langPairLabel.textContent = `${srcSel.value.toUpperCase()} → ${tgtSel.value.toUpperCase()}`;
-  interimChip.textContent = srcSel.value.toUpperCase();
-}
-function swapLangs(){
-  const a=srcSel.value; srcSel.value=tgtSel.value; tgtSel.value=a;
-  updateLangPair(); restartRecognitionIfNeeded();
-}
+function updateLangPair(){ interimChip.textContent=srcSel.value.toUpperCase(); }
+function swapLangs(){const a=srcSel.value;srcSel.value=tgtSel.value;tgtSel.value=a;updateLangPair();restartRecognitionIfNeeded();}
 
-/* =========================================================
-   TIMER + STATUS
-   ========================================================= */
-function startTimer(){
-  if(state.timerId) return;
-  state.timerId=setInterval(()=>{
-    state.seconds++;
-    const m=String(Math.floor(state.seconds/60)).padStart(2,"0");
-    const s=String(state.seconds%60).padStart(2,"0");
-    clock.textContent=`${m}:${s}`;
-  },1000);
-}
-function stopTimer(){clearInterval(state.timerId); state.timerId=null;}
-
+/* ---------- TIMER + STATUS ---------- */
+function startTimer(){if(state.timerId)return;state.timerId=setInterval(()=>{state.seconds++;const m=String(Math.floor(state.seconds/60)).padStart(2,"0");const s=String(state.seconds%60).padStart(2,"0");clock.textContent=`${m}:${s}`;},1000);}
+function stopTimer(){clearInterval(state.timerId);state.timerId=null;}
 function setStatus(mode){
   state.mode=mode;
-  if(mode==="recording"){
-    statusPill.dataset.state="rec"; statusText.textContent="Đang ghi";
-    txLive.classList.add("on");
-  }else if(mode==="demo"){
-    statusPill.dataset.state="demo"; statusText.textContent="Đang phát demo";
-    txLive.classList.add("on");
-  }else{
-    statusPill.dataset.state="idle"; statusText.textContent="Sẵn sàng";
-    txLive.classList.remove("on");
-  }
+  if(mode==="recording"){statusPill.dataset.state="rec";statusText.textContent="Đang ghi";txLive.classList.add("on");}
+  else if(mode==="demo"){statusPill.dataset.state="demo";statusText.textContent="Đang phát demo";txLive.classList.add("on");}
+  else{statusPill.dataset.state="idle";statusText.textContent="Sẵn sàng";txLive.classList.remove("on");}
 }
 
-/* =========================================================
-   THÊM SEGMENT VÀO PHỤ ĐỀ
-   ========================================================= */
-const AVATAR_COLORS=["#0B6E63","#C2410C","#7C3AED","#2563EB","#DB2777","#0891B2"];
-function speakerColor(name){
-  let h=0; for(const c of name) h=c.charCodeAt(0)+((h<<5)-h);
-  return AVATAR_COLORS[Math.abs(h)%AVATAR_COLORS.length];
-}
+/* ---------- SEGMENT ---------- */
+const AVATAR_COLORS=["#E89211","#2F6FB0","#7C5CBF","#3A9D6B","#D8568B","#0E9AA8"];
+function speakerColor(name){let h=0;for(const c of name)h=c.charCodeAt(0)+((h<<5)-h);return AVATAR_COLORS[Math.abs(h)%AVATAR_COLORS.length];}
+function timeStamp(){const d=new Date();return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");}
 
-function timeStamp(){
-  const d=new Date();
-  return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
-}
-
-/* tạo 1 phần tử segment (tgt có thể null -> hiện shimmer chờ dịch) */
-function renderSegment(seg, {typing=false}={}){
+function renderSegment(seg,{typing=false}={}){
   txEmpty.style.display="none";
-  // bỏ active ở segment cũ
   txBody.querySelectorAll(".seg.active").forEach(s=>s.classList.remove("active"));
-
   const el=document.createElement("div");
-  el.className="seg"+(typing?" active":"");
-  el.dataset.id=seg.id;
+  el.className="seg"+(typing?" active":""); el.dataset.id=seg.id;
   const initial=(seg.speaker||"S").trim()[0].toUpperCase();
   el.innerHTML=`
     <div class="seg-gutter">
@@ -791,431 +608,276 @@ function renderSegment(seg, {typing=false}={}){
     </div>
     <div>
       <div class="seg-speaker">${seg.speaker}</div>
-      <div class="seg-line src">
-        <span class="chip src">${seg.srcCode.toUpperCase()}</span>
-        <span class="seg-text src">${seg.src}</span>
-      </div>
-      <div class="seg-line tgt">
-        <span class="chip tgt">${seg.tgtCode.toUpperCase()}</span>
-        <span class="seg-text tgt" data-tgt>${seg.tgt!=null?seg.tgt:'<span class="shimmer"></span>'}</span>
-      </div>
+      <div class="seg-line src"><span class="chip src">${seg.srcCode.toUpperCase()}</span><span class="seg-text src">${seg.src}</span></div>
+      <div class="seg-line tgt"><span class="chip tgt">${seg.tgtCode.toUpperCase()}</span><span class="seg-text tgt" data-tgt>${seg.tgt!=null?seg.tgt:'<span class="shimmer"></span>'}</span></div>
     </div>`;
-  // chèn trước interim
-  txBody.insertBefore(el, txInterim);
-  scrollDown();
-  return el;
+  txBody.insertBefore(el,txInterim); scrollDown(); return el;
 }
+function updateSegmentTgt(id,text){const el=txBody.querySelector(`.seg[data-id="${id}"] [data-tgt]`);if(el)el.innerHTML=text;}
+function scrollDown(){if(state.autoscroll)txBody.scrollTop=txBody.scrollHeight;}
+function refreshWordCount(){wordCount.textContent=state.segments.reduce((a,s)=>a+(s.src?s.src.trim().split(/\s+/).length:0),0);}
 
-function updateSegmentTgt(id, text){
-  const el=txBody.querySelector(`.seg[data-id="${id}"] [data-tgt]`);
-  if(el) el.innerHTML=text;
-}
-
-function scrollDown(){ if(state.autoscroll) txBody.scrollTop=txBody.scrollHeight; }
-
-function refreshWordCount(){
-  const n=state.segments.reduce((a,s)=>a+(s.src?s.src.trim().split(/\s+/).length:0),0);
-  wordCount.textContent=n;
-}
-
-/* =========================================================
-   DỊCH (MyMemory — free, no key)
-   ========================================================= */
-async function translate(text, from, to){
-  if(!text || from===to) return text;
+/* ---------- DỊCH (MyMemory) ---------- */
+async function translate(text,from,to){
+  if(!text||from===to)return text;
   try{
     const url=`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${from}|${to}`;
-    const r=await fetch(url);
-    const d=await r.json();
-    if(d && d.responseData && d.responseData.translatedText){
+    const r=await fetch(url);const d=await r.json();
+    if(d&&d.responseData&&d.responseData.translatedText){
       let out=d.responseData.translatedText;
-      if(/MYMEMORY WARNING|QUOTA/i.test(out)) return "(đã đạt giới hạn dịch free hôm nay)";
+      if(/MYMEMORY WARNING|QUOTA/i.test(out))return "(đã đạt giới hạn dịch free hôm nay)";
       return out;
     }
-  }catch(e){ console.warn("translate error",e); }
+  }catch(e){console.warn("translate error",e);}
   return "(không dịch được — kiểm tra kết nối)";
 }
 
-/* =========================================================
-   GHI GIỌNG NÓI (Web Speech API)
-   ========================================================= */
-function toggleRecording(){
-  if(state.mode==="demo"){ stopDemo(); }
-  if(state.mode==="recording") stopRecording();
-  else startRecording();
-}
+/* ---------- PHÁT ÂM ---------- */
+function speak(text,lang){try{const u=new SpeechSynthesisUtterance(text);u.lang=lang||"en-US";u.rate=.92;speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}}
 
+/* ---------- GHI GIỌNG NÓI ---------- */
+function toggleRecording(){if(state.mode==="demo")stopDemo();if(state.mode==="recording")stopRecording();else startRecording();}
 function startRecording(){
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR){
-    showToast("Trình duyệt chưa hỗ trợ ghi giọng nói. Hãy dùng Chrome/Edge trên bản deploy HTTPS, hoặc thử Phát demo.");
-    return;
-  }
-  const rec=new SR();
-  rec.lang=langByCode(srcSel.value).bcp;
-  rec.continuous=true;
-  rec.interimResults=true;
-  state.recognition=rec;
-
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){showToast("Trình duyệt chưa hỗ trợ ghi giọng nói. Hãy dùng Chrome/Edge trên bản deploy HTTPS, hoặc thử Phát demo.");return;}
+  const rec=new SR();rec.lang=langByCode(srcSel.value).bcp;rec.continuous=true;rec.interimResults=true;state.recognition=rec;
   rec.onresult=async(e)=>{
     let interim="";
     for(let i=e.resultIndex;i<e.results.length;i++){
       const res=e.results[i];
-      if(res.isFinal){
-        const text=res[0].transcript.trim();
-        if(text) await commitUtterance(text);
-        interim="";
-      }else{
-        interim+=res[0].transcript;
-      }
+      if(res.isFinal){const text=res[0].transcript.trim();if(text)await commitUtterance(text);interim="";}
+      else interim+=res[0].transcript;
     }
-    if(interim){
-      txInterim.classList.add("on");
-      interimText.textContent=interim;
-      scrollDown();
-    }else{
-      txInterim.classList.remove("on");
-    }
+    if(interim){txInterim.classList.add("on");interimText.textContent=interim;scrollDown();}
+    else txInterim.classList.remove("on");
   };
-  rec.onerror=(e)=>{
-    if(e.error==="not-allowed"||e.error==="service-not-allowed"){
-      showToast("Cần cấp quyền micro để ghi. Hãy bật quyền cho trang.");
-      stopRecording();
-    }
-  };
-  rec.onend=()=>{ if(state.mode==="recording"){ try{rec.start();}catch(_){} } };
-
-  try{ rec.start(); }catch(e){ console.warn(e); }
-
-  setupMicLevel();
-  setStatus("recording");
-  startTimer();
-  recBtn.classList.add("recording");
-  recTitle.textContent="Dừng ghi"; recSub.textContent="Đang nghe…";
+  rec.onerror=(e)=>{if(e.error==="not-allowed"||e.error==="service-not-allowed"){showToast("Cần cấp quyền micro để ghi. Hãy bật quyền cho trang.");stopRecording();}};
+  rec.onend=()=>{if(state.mode==="recording"){try{rec.start();}catch(_){}}};
+  try{rec.start();}catch(e){console.warn(e);}
+  setupMicLevel();setStatus("recording");startTimer();
+  recBtn.classList.add("recording");recTitle.textContent="Dừng ghi";recSub.textContent="Đang nghe…";
   showToast("Đang ghi. Hãy nói thử — bản dịch sẽ hiện ngay bên dưới.");
 }
-
 function stopRecording(){
-  if(state.recognition){ state.recognition.onend=null; try{state.recognition.stop();}catch(_){} state.recognition=null; }
-  txInterim.classList.remove("on");
-  teardownMic();
-  setStatus("idle");
-  stopTimer();
-  recBtn.classList.remove("recording");
-  recTitle.textContent="Bắt đầu ghi"; recSub.textContent="Dịch giọng nói trực tiếp";
+  if(state.recognition){state.recognition.onend=null;try{state.recognition.stop();}catch(_){}state.recognition=null;}
+  txInterim.classList.remove("on");teardownMic();setStatus("idle");stopTimer();
+  recBtn.classList.remove("recording");recTitle.textContent="Bắt đầu ghi";recSub.textContent="Dịch & ghi chú bài giảng";
   maybeShowGenButton();
 }
-
-function restartRecognitionIfNeeded(){
-  if(state.mode==="recording"){ stopRecording(); startRecording(); }
-}
-
+function restartRecognitionIfNeeded(){if(state.mode==="recording"){stopRecording();startRecording();}}
 async function commitUtterance(text){
-  const seg={
-    id:"s"+Date.now()+Math.random().toString(36).slice(2,6),
-    time:timeStamp(), speaker:"Bạn", color:speakerColor("Ban"),
-    srcCode:srcSel.value, tgtCode:tgtSel.value, src:text, tgt:null
-  };
-  state.segments.push(seg);
-  renderSegment(seg, {typing:true});
-  refreshWordCount();
-  const t=await translate(text, srcSel.value, tgtSel.value);
-  seg.tgt=t;
-  updateSegmentTgt(seg.id, t);
-  scrollDown();
+  const seg={id:"s"+Date.now()+Math.random().toString(36).slice(2,6),time:timeStamp(),speaker:"Giảng viên",color:speakerColor("GiangVien"),srcCode:srcSel.value,tgtCode:tgtSel.value,src:text,tgt:null};
+  state.segments.push(seg);renderSegment(seg,{typing:true});refreshWordCount();
+  const t=await translate(text,srcSel.value,tgtSel.value);seg.tgt=t;updateSegmentTgt(seg.id,t);scrollDown();
 }
 
-/* =========================================================
-   ÂM LƯỢNG MICRO (cho waveform thật)
-   ========================================================= */
+/* ---------- ÂM LƯỢNG MIC ---------- */
 async function setupMicLevel(){
   try{
     state.micStream=await navigator.mediaDevices.getUserMedia({audio:true});
     state.audioCtx=new (window.AudioContext||window.webkitAudioContext)();
     const src=state.audioCtx.createMediaStreamSource(state.micStream);
-    state.analyser=state.audioCtx.createAnalyser();
-    state.analyser.fftSize=64;
-    src.connect(state.analyser);
-  }catch(e){ /* không sao, dùng waveform mô phỏng */ }
+    state.analyser=state.audioCtx.createAnalyser();state.analyser.fftSize=64;src.connect(state.analyser);
+  }catch(e){}
 }
-function teardownMic(){
-  if(state.micStream){ state.micStream.getTracks().forEach(t=>t.stop()); state.micStream=null; }
-  if(state.audioCtx){ state.audioCtx.close(); state.audioCtx=null; }
-  state.analyser=null;
-}
+function teardownMic(){if(state.micStream){state.micStream.getTracks().forEach(t=>t.stop());state.micStream=null;}if(state.audioCtx){state.audioCtx.close();state.audioCtx=null;}state.analyser=null;}
 
-/* =========================================================
-   WAVEFORM (canvas)
-   ========================================================= */
+/* ---------- WAVEFORM ---------- */
 function startWaveform(){
-  const cv=$("wave"), ctx=cv.getContext("2d");
-  const N=22, gap=2;
-  const W=cv.width, H=cv.height;
-  const bw=(W-(N-1)*gap*2)/N;
-  let phase=0;
-  const reduce=window.matchMedia("(prefers-reduced-motion:reduce)").matches;
-
+  const cv=$("wave"),ctx=cv.getContext("2d");
+  const N=22,gap=2,W=cv.width,H=cv.height,bw=(W-(N-1)*gap*2)/N;
+  let phase=0;const reduce=window.matchMedia("(prefers-reduced-motion:reduce)").matches;
   function draw(){
-    ctx.clearRect(0,0,W,H);
-    phase+=0.12;
-    let levels=new Array(N).fill(0);
-
-    if(state.analyser){
-      const data=new Uint8Array(state.analyser.frequencyBinCount);
-      state.analyser.getByteFrequencyData(data);
-      for(let i=0;i<N;i++){
-        levels[i]=(data[i%data.length]/255);
-      }
-    }else{
-      const active = state.mode!=="idle";
-      for(let i=0;i<N;i++){
-        const base = reduce? .25 : (Math.sin(phase+i*0.55)*0.5+0.5);
-        levels[i]= active ? (0.25+base*0.7*(0.6+Math.random()*0.4)) : (0.12+base*0.12);
-      }
-    }
-
+    ctx.clearRect(0,0,W,H);phase+=0.12;let levels=new Array(N).fill(0);
+    if(state.analyser){const data=new Uint8Array(state.analyser.frequencyBinCount);state.analyser.getByteFrequencyData(data);for(let i=0;i<N;i++)levels[i]=data[i%data.length]/255;}
+    else{const active=state.mode!=="idle";for(let i=0;i<N;i++){const base=reduce?.25:(Math.sin(phase+i*0.55)*0.5+0.5);levels[i]=active?(0.25+base*0.7*(0.6+Math.random()*0.4)):(0.1+base*0.1);}}
     for(let i=0;i<N;i++){
-      const h=Math.max(3, levels[i]*H*0.92);
-      const x=i*(bw+gap*2);
-      const y=(H-h)/2;
-      const on = state.mode!=="idle";
-      ctx.fillStyle = on ? (state.mode==="recording" ? "#FF7A6E" : "#2BD4BC") : "#3a534e";
-      roundRect(ctx,x,y,bw,h,bw/2); ctx.fill();
+      const h=Math.max(3,levels[i]*H*0.92),x=i*(bw+gap*2),y=(H-h)/2,on=state.mode!=="idle";
+      ctx.fillStyle=on?(state.mode==="recording"?"#E5484D":"#E89211"):"#CBD2C8";
+      roundRect(ctx,x,y,bw,h,bw/2);ctx.fill();
     }
     requestAnimationFrame(draw);
   }
   draw();
 }
-function roundRect(ctx,x,y,w,h,r){
-  r=Math.min(r,w/2,h/2);
-  ctx.beginPath();
-  ctx.moveTo(x+r,y);
-  ctx.arcTo(x+w,y,x+w,y+h,r);
-  ctx.arcTo(x+w,y+h,x,y+h,r);
-  ctx.arcTo(x,y+h,x,y,r);
-  ctx.arcTo(x,y,x+w,y,r);
-  ctx.closePath();
-}
+function roundRect(ctx,x,y,w,h,r){r=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
 
-/* =========================================================
-   DEMO (kịch bản dựng sẵn EN -> VI)
-   ========================================================= */
+/* ---------- DEMO: bài giảng English -> Vietnamese ---------- */
 const DEMO=[
-  {speaker:"Alex", src:"Alright everyone, thanks for joining. Let's get started with the sprint review.",
-   tgt:"Được rồi mọi người, cảm ơn đã tham gia. Chúng ta bắt đầu buổi sprint review nhé."},
-  {speaker:"Alex", src:"First, the backend team finished the authentication service this week.",
-   tgt:"Đầu tiên, nhóm backend đã hoàn thành authentication service trong tuần này."},
-  {speaker:"Mai", src:"Nice work. We also need to decide on the deployment date for the public demo.",
-   tgt:"Làm tốt lắm. Chúng ta cũng cần quyết định ngày deploy cho bản demo công khai."},
-  {speaker:"Alex", src:"I suggest we target next Friday so QA has enough time to test.",
-   tgt:"Tôi đề xuất nhắm tới thứ Sáu tuần sau để QA có đủ thời gian kiểm thử."},
-  {speaker:"Mai", src:"Sounds good. I'll prepare the release notes by Thursday and share the document with the team.",
-   tgt:"Nghe hợp lý. Tôi sẽ chuẩn bị release notes trước thứ Năm và chia sẻ tài liệu cho cả nhóm."},
-  {speaker:"Linh", src:"Don't forget we should update the API documentation before the release.",
-   tgt:"Đừng quên là chúng ta nên cập nhật API documentation trước khi phát hành."},
+  {speaker:"Teacher",src:"Welcome back, class. Today we will learn about functions in programming.",
+   tgt:"Chào mừng cả lớp quay lại. Hôm nay chúng ta sẽ học về hàm (functions) trong lập trình."},
+  {speaker:"Teacher",src:"A function is a reusable block of code that performs one specific task.",
+   tgt:"Hàm là một khối lệnh có thể tái sử dụng, thực hiện một nhiệm vụ cụ thể."},
+  {speaker:"Teacher",src:"For example, a function can take two numbers and return their sum.",
+   tgt:"Ví dụ, một hàm có thể nhận hai số và trả về tổng của chúng."},
+  {speaker:"Teacher",src:"We use functions to avoid repeating the same code many times.",
+   tgt:"Chúng ta dùng hàm để tránh lặp lại cùng một đoạn code nhiều lần."},
+  {speaker:"Minh",src:"So the values we pass into a function are called parameters, right?",
+   tgt:"Vậy những giá trị chúng ta truyền vào hàm gọi là tham số (parameters), đúng không ạ?"},
+  {speaker:"Teacher",src:"Exactly. Your homework is to write three functions and test them before next class.",
+   tgt:"Chính xác. Bài tập về nhà của các em là viết ba hàm và kiểm thử chúng trước buổi học sau."},
 ];
-let demoTimer=null, demoIdx=0;
-
-function toggleDemo(){
-  if(state.mode==="demo") stopDemo();
-  else startDemo();
-}
+let demoTimer=null,demoIdx=0;
+function toggleDemo(){if(state.mode==="demo")stopDemo();else startDemo();}
 function startDemo(){
-  if(state.mode==="recording") stopRecording();
-  demoIdx=0;
-  setStatus("demo");
-  startTimer();
-  demoBtn.classList.add("playing"); demoLabel.textContent="Dừng demo";
-  recBtn.style.opacity=".5"; recBtn.style.pointerEvents="none";
+  if(state.mode==="recording")stopRecording();
+  demoIdx=0;setStatus("demo");startTimer();
+  demoBtn.classList.add("playing");demoLabel.textContent="Dừng demo";
+  recBtn.style.opacity=".5";recBtn.style.pointerEvents="none";
   playNextDemo();
 }
 function stopDemo(){
-  clearTimeout(demoTimer); demoTimer=null;
-  setStatus("idle"); stopTimer();
-  demoBtn.classList.remove("playing"); demoLabel.textContent="Phát demo";
-  recBtn.style.opacity=""; recBtn.style.pointerEvents="";
+  clearTimeout(demoTimer);demoTimer=null;setStatus("idle");stopTimer();
+  demoBtn.classList.remove("playing");demoLabel.textContent="Phát demo";
+  recBtn.style.opacity="";recBtn.style.pointerEvents="";
   maybeShowGenButton();
 }
 function playNextDemo(){
-  if(demoIdx>=DEMO.length){ stopDemo(); showToast("Demo xong! Bấm “Tạo tóm tắt AI” để xem kết quả."); return; }
+  if(demoIdx>=DEMO.length){stopDemo();showToast("Demo xong! Bấm “Tạo tóm tắt bài học” để xem kết quả.");return;}
   const d=DEMO[demoIdx++];
-  const seg={
-    id:"d"+demoIdx, time:timeStamp(), speaker:d.speaker, color:speakerColor(d.speaker),
-    srcCode:"en", tgtCode:"vi", src:d.src, tgt:""
-  };
+  const seg={id:"d"+demoIdx,time:timeStamp(),speaker:d.speaker,color:speakerColor(d.speaker),srcCode:"en",tgtCode:"vi",src:d.src,tgt:""};
   state.segments.push(seg);
   const el=renderSegment(seg,{typing:true});
-  // gõ chữ bản dịch theo từ
   const tgtEl=el.querySelector("[data-tgt]");
-  typeWords(tgtEl, d.tgt, ()=>{
-    seg.tgt=d.tgt;
-    refreshWordCount();
-    demoTimer=setTimeout(playNextDemo, 700);
-  });
+  typeWords(tgtEl,d.tgt,()=>{seg.tgt=d.tgt;refreshWordCount();demoTimer=setTimeout(playNextDemo,750);});
   scrollDown();
 }
-function typeWords(el, text, done){
-  const words=text.split(" ");
-  let i=0; el.innerHTML="";
-  const caret=document.createElement("span"); caret.className="caret";
-  el.appendChild(caret);
+function typeWords(el,text,done){
+  const words=text.split(" ");let i=0;el.innerHTML="";
+  const caret=document.createElement("span");caret.className="caret";el.appendChild(caret);
   const step=()=>{
-    if(state.mode!=="demo"){ el.textContent=text; return; }
-    if(i>=words.length){ caret.remove(); done&&done(); return; }
-    caret.insertAdjacentText("beforebegin",(i?" ":"")+words[i]);
-    i++; scrollDown();
-    demoTimer=setTimeout(step, 55+Math.random()*45);
-  };
-  step();
+    if(state.mode!=="demo"){el.textContent=text;return;}
+    if(i>=words.length){caret.remove();done&&done();return;}
+    caret.insertAdjacentText("beforebegin",(i?" ":"")+words[i]);i++;scrollDown();
+    demoTimer=setTimeout(step,55+Math.random()*45);
+  };step();
 }
 
-/* =========================================================
-   TÓM TẮT  (demo: dựng sẵn | thật: extractive cơ bản)
-   ========================================================= */
+/* ---------- TÓM TẮT + TỪ VỰNG + BÀI TẬP ---------- */
 function maybeShowGenButton(){
-  const hasContent=state.segments.length>0;
-  $("genBtn").style.display = hasContent ? "flex" : "none";
-  if(!hasContent){
-    $("summaryEmpty").style.display="flex";
-    $("summaryContent").style.display="none";
-  }
+  const has=state.segments.length>0;
+  $("genBtn").style.display=has?"flex":"none";
+  if(!has){$("summaryEmpty").style.display="flex";$("summaryContent").style.display="none";}
 }
-
-function onGenerateSummary(){
-  const btn=$("genBtn");
-  btn.classList.add("spinning");
+async function onGenerateSummary(){
+  const btn=$("genBtn");btn.classList.add("spinning");
   btn.querySelector(".gen-icon").innerHTML='<span class="spinner"></span>';
-  btn.querySelector(".gen-label").textContent="Đang phân tích…";
-
-  setTimeout(()=>{
-    const result = buildSummary();
-    renderSummary(result);
-    btn.classList.remove("spinning");
-    btn.querySelector(".gen-icon").innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/></svg>';
-    btn.querySelector(".gen-label").textContent="Tạo lại tóm tắt";
-    showToast("Đã tạo tóm tắt cuộc họp.");
-  }, 1100);
+  btn.querySelector(".gen-label").textContent="Đang phân tích bài giảng…";
+  await new Promise(r=>setTimeout(r,400));
+  const result=await buildSummary();
+  renderSummary(result);
+  btn.classList.remove("spinning");
+  btn.querySelector(".gen-icon").innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/></svg>';
+  btn.querySelector(".gen-label").textContent="Tạo lại tóm tắt";
+  showToast("Đã tạo tóm tắt bài học.");
 }
 
-/* nếu là đúng kịch bản demo -> trả tóm tắt biên tập đẹp; nếu không -> extractive */
-function buildSummary(){
-  const isDemo = state.segments.length>0 && state.segments.every(s=>s.id.startsWith("d"));
+async function buildSummary(){
+  const isDemo=state.segments.length>0&&state.segments.every(s=>s.id.startsWith("d"));
   if(isDemo){
     return {
       points:[
-        "Buổi sprint review bắt đầu; nhóm backend đã hoàn thành authentication service trong tuần.",
-        "Nhóm thống nhất nhắm ngày deploy bản demo công khai vào thứ Sáu tuần sau để QA có thời gian kiểm thử.",
-        "Cần cập nhật release notes và API documentation trước khi phát hành."
+        "Bài học giới thiệu khái niệm hàm (function) trong lập trình.",
+        "Hàm là khối lệnh tái sử dụng, thực hiện một nhiệm vụ cụ thể; ví dụ: nhận 2 số và trả về tổng.",
+        "Dùng hàm để tránh lặp lại code; giá trị truyền vào hàm gọi là tham số (parameters).",
       ],
-      actions:[
-        {who:"Mai", text:"chuẩn bị release notes trước thứ Năm và chia sẻ cho cả nhóm"},
-        {who:"Cả nhóm", text:"chốt ngày deploy thứ Sáu cho bản demo công khai"},
-        {who:"Linh", text:"cập nhật API documentation trước khi release"},
-        {who:"QA", text:"lên lịch kiểm thử trước ngày phát hành"},
+      vocab:[
+        {term:"function",lang:"en-US",mean:"hàm"},
+        {term:"reusable",lang:"en-US",mean:"có thể tái sử dụng"},
+        {term:"block of code",lang:"en-US",mean:"khối lệnh"},
+        {term:"return",lang:"en-US",mean:"trả về (giá trị)"},
+        {term:"parameter",lang:"en-US",mean:"tham số"},
+        {term:"homework",lang:"en-US",mean:"bài tập về nhà"},
       ],
-      terms:[
-        {t:"authentication service",c:1},{t:"deployment / deploy",c:2},
-        {t:"sprint review",c:1},{t:"release notes",c:2},
-        {t:"QA",c:2},{t:"API documentation",c:1},{t:"public demo",c:2},
+      homework:[
+        {who:"",text:"Viết ba hàm (functions) và kiểm thử chúng trước buổi học sau."},
+        {who:"",text:"Ôn lại khái niệm tham số (parameters) và giá trị trả về (return)."},
       ]
     };
   }
-  // ----- Extractive cơ bản từ transcript thật -----
-  const sourceText = state.segments.map(s=>s.tgt||s.src).join(" ");
-  const sentences = sourceText.split(/(?<=[.!?。！？])\s+/).filter(s=>s.trim().length>4);
-  const stop=new Set(("và là của có các một những được cho với từ này đó khi nếu thì để the a an and or but to of in on for is are was were be will would can could should i you we they it this that".split(" ")));
+  // ----- Từ transcript thật -----
+  const text=state.segments.map(s=>s.tgt||s.src).join(" ");
+  const sentences=text.split(/(?<=[.!?。！？])\s+/).filter(s=>s.trim().length>4);
+  const stop=new Set("và là của có các một những được cho với từ này đó khi nếu thì để the a an and or but to of in on for is are was were be will would can could should i you we they it this that".split(" "));
   const freq={};
-  sourceText.toLowerCase().split(/[^\p{L}\p{N}]+/u).forEach(w=>{
-    if(w.length>2 && !stop.has(w)) freq[w]=(freq[w]||0)+1;
-  });
-  const scored=sentences.map((s,idx)=>{
-    let sc=0; s.toLowerCase().split(/[^\p{L}\p{N}]+/u).forEach(w=>sc+=freq[w]||0);
-    return {s:s.trim(), sc:sc/Math.sqrt(s.split(" ").length||1), idx};
-  }).sort((a,b)=>b.sc-a.sc).slice(0,4).sort((a,b)=>a.idx-b.idx);
-
-  // action cues
-  const cues=/(cần|sẽ|phải|nên|hãy|trước thứ|deadline|todo|chuẩn bị|cập nhật|gửi|hoàn thành|quyết định)/i;
-  const actions=sentences.filter(s=>cues.test(s)).slice(0,5).map(s=>({who:"", text:s.trim()}));
-
-  const terms=Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([t,c])=>({t,c}));
-
+  text.toLowerCase().split(/[^\p{L}\p{N}]+/u).forEach(w=>{if(w.length>2&&!stop.has(w))freq[w]=(freq[w]||0)+1;});
+  const scored=sentences.map((s,idx)=>{let sc=0;s.toLowerCase().split(/[^\p{L}\p{N}]+/u).forEach(w=>sc+=freq[w]||0);return {s:s.trim(),sc:sc/Math.sqrt(s.split(" ").length||1),idx};}).sort((a,b)=>b.sc-a.sc).slice(0,4).sort((a,b)=>a.idx-b.idx);
+  const cues=/(cần|sẽ|phải|nên|hãy|trước thứ|deadline|bài tập|homework|làm|chuẩn bị|ôn|nộp|hoàn thành)/i;
+  const homework=sentences.filter(s=>cues.test(s)).slice(0,5).map(s=>({who:"",text:s.trim()}));
+  // từ vựng: dịch top từ khoá tiếng nguồn sang đích (cap 6 để khỏi quá giới hạn)
+  const srcText=state.segments.map(s=>s.src).join(" ");
+  const sfreq={};srcText.toLowerCase().split(/[^\p{L}\p{N}]+/u).forEach(w=>{if(w.length>3&&!stop.has(w))sfreq[w]=(sfreq[w]||0)+1;});
+  const topTerms=Object.entries(sfreq).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([t])=>t);
+  const srcBcp=langByCode(srcSel.value).bcp;
+  const vocab=[];
+  for(const t of topTerms){const m=await translate(t,srcSel.value,tgtSel.value);vocab.push({term:t,lang:srcBcp,mean:m});}
   return {
-    points: scored.length?scored.map(x=>x.s):["Chưa đủ nội dung để tóm tắt — hãy ghi/nói thêm."],
-    actions: actions.length?actions:[{who:"",text:"Không phát hiện đầu việc rõ ràng."}],
-    terms
+    points:scored.length?scored.map(x=>x.s):["Chưa đủ nội dung để tóm tắt — hãy ghi/nói thêm."],
+    vocab,
+    homework:homework.length?homework:[{who:"",text:"Không phát hiện bài tập/đầu việc rõ ràng."}]
   };
 }
 
 function renderSummary(r){
+  // Tóm tắt
   $("summaryEmpty").style.display="none";
-  const c=$("summaryContent"); c.style.display="block";
+  const c=$("summaryContent");c.style.display="block";
   c.innerHTML=`
-    <div class="sum-section">
-      <div class="sum-label">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-        Điểm chính
-      </div>
-      ${r.points.map((p,i)=>`<div class="sum-point" style="animation-delay:${i*.07}s"><span class="bullet"></span><span>${esc(p)}</span></div>`).join("")}
-    </div>`;
+    <p class="sum-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Điểm chính của bài học</p>
+    ${r.points.map((p,i)=>`<div class="sum-point" style="animation-delay:${i*.07}s"><span class="bullet"></span><span>${esc(p)}</span></div>`).join("")}`;
 
-  // actions tab
-  const ac=$("actionsContent"); $("actionsEmpty").style.display=r.actions.length?"none":"flex";
-  ac.innerHTML=r.actions.map((a,i)=>`
-    <div class="action-item" style="animation-delay:${i*.07}s">
-      <div class="action-check" onclick="this.parentElement.classList.toggle('done')">
+  // Từ vựng
+  const vc=$("vocabContent");$("vocabEmpty").style.display=r.vocab.length?"none":"flex";
+  vc.innerHTML=r.vocab.map((v,i)=>`
+    <div class="vcard" style="animation-delay:${i*.06}s">
+      <div class="vcard-top">
+        <span class="vterm">${esc(v.term)}</span>
+        <button class="vspeak" data-speak="${esc(v.term)}" data-lang="${v.lang}" title="Nghe phát âm" aria-label="Nghe phát âm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>
+        </button>
+      </div>
+      <div class="vmean"><span class="arrow">→</span> ${esc(v.mean)}</div>
+    </div>`).join("");
+  vc.querySelectorAll(".vspeak").forEach(b=>b.onclick=()=>speak(b.dataset.speak,b.dataset.lang));
+  $("vocabCount").textContent=r.vocab.length;
+
+  // Bài tập
+  const hc=$("hwContent");$("hwEmpty").style.display=r.homework.length?"none":"flex";
+  hc.innerHTML=r.homework.map((a,i)=>`
+    <div class="hw-item" style="animation-delay:${i*.07}s">
+      <div class="hw-check" onclick="this.parentElement.classList.toggle('done')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
-      <div class="action-text">${a.who?`<span class="who">${esc(a.who)}</span> — `:""}${esc(a.text)}</div>
+      <div class="hw-text">${a.who?`<span class="who">${esc(a.who)}</span> — `:""}${esc(a.text)}</div>
     </div>`).join("");
-  $("actCount").textContent=r.actions.length;
-
-  // terms tab
-  const tc=$("termsContent"); $("termsEmpty").style.display=r.terms.length?"none":"flex";
-  tc.innerHTML=r.terms.map(t=>`<span class="term">${esc(t.t)} <span class="cnt">${t.c}×</span></span>`).join("");
+  $("hwCount").textContent=r.homework.length;
 }
+function esc(s){return String(s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]))}
 
-function esc(s){return String(s).replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]))}
-
-/* =========================================================
-   TIỆN ÍCH: clear / export / toast
-   ========================================================= */
+/* ---------- TIỆN ÍCH ---------- */
 function clearSession(){
-  if(state.mode!=="idle"){ stopRecording(); stopDemo(); }
-  state.segments=[]; state.seconds=0; clock.textContent="00:00";
-  txBody.querySelectorAll(".seg").forEach(s=>s.remove());
-  txEmpty.style.display="flex";
-  refreshWordCount();
-  $("genBtn").style.display="none";
-  $("summaryContent").style.display="none"; $("summaryEmpty").style.display="flex";
-  $("actionsContent").innerHTML=""; $("actionsEmpty").style.display="flex"; $("actCount").textContent="0";
-  $("termsContent").innerHTML=""; $("termsEmpty").style.display="flex";
-  showToast("Đã bắt đầu phiên mới.");
+  if(state.mode!=="idle"){stopRecording();stopDemo();}
+  state.segments=[];state.seconds=0;clock.textContent="00:00";
+  txBody.querySelectorAll(".seg").forEach(s=>s.remove());txEmpty.style.display="flex";
+  refreshWordCount();$("genBtn").style.display="none";
+  $("summaryContent").style.display="none";$("summaryEmpty").style.display="flex";
+  $("vocabContent").innerHTML="";$("vocabEmpty").style.display="flex";$("vocabCount").textContent="0";
+  $("hwContent").innerHTML="";$("hwEmpty").style.display="flex";$("hwCount").textContent="0";
+  showToast("Đã bắt đầu buổi học mới.");
 }
-
 function exportTranscript(){
-  if(!state.segments.length){ showToast("Chưa có nội dung để tải."); return; }
+  if(!state.segments.length){showToast("Chưa có nội dung để tải.");return;}
   const title=$("meetingTitle").value;
-  let out=`${title}\n${$("meetingDate").textContent} · Thời lượng ${clock.textContent}\nLingora — Live Meeting Translator\n${"=".repeat(46)}\n\n`;
-  state.segments.forEach(s=>{
-    out+=`[${s.time}] ${s.speaker}\n  (${s.srcCode.toUpperCase()}) ${s.src}\n  (${s.tgtCode.toUpperCase()}) ${s.tgt||""}\n\n`;
-  });
+  let out=`${title}\n${new Date().toLocaleDateString("vi-VN")} · Thời lượng ${clock.textContent}\nLingora Study — Ghi chú bài giảng\n${"=".repeat(46)}\n\n`;
+  state.segments.forEach(s=>{out+=`[${s.time}] ${s.speaker}\n  (${s.srcCode.toUpperCase()}) ${s.src}\n  (${s.tgtCode.toUpperCase()}) ${s.tgt||""}\n\n`;});
   const blob=new Blob([out],{type:"text/plain;charset=utf-8"});
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download=title.replace(/[^\w\u00C0-\u1EF9 -]/g,"").trim().replace(/\s+/g,"_")+".txt";
-  a.click();
-  showToast("Đã tải transcript (.txt).");
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download=title.replace(/[^\w\u00C0-\u1EF9 -]/g,"").trim().replace(/\s+/g,"_")+".txt";a.click();
+  showToast("Đã tải ghi chú (.txt).");
 }
-
 let toastTimer=null;
-function showToast(msg){
-  toastText.textContent=msg;
-  toast.classList.add("show");
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>toast.classList.remove("show"),3200);
-}
+function showToast(msg){toastText.textContent=msg;toast.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove("show"),3200);}
 
-/* ---------- GO ---------- */
 init();
 </script>
 </body>
