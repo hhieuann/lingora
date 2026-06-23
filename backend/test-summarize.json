@@ -1,0 +1,8 @@
+{
+  "targetLang": "vi",
+  "segments": [
+    { "speaker": "Teacher", "src": "A function is a reusable block of code that performs one specific task.", "tgt": "Hàm là một khối lệnh có thể tái sử dụng, thực hiện một nhiệm vụ cụ thể." },
+    { "speaker": "Teacher", "src": "We use functions to avoid repeating the same code many times.", "tgt": "Chúng ta dùng hàm để tránh lặp lại cùng một đoạn code nhiều lần." },
+    { "speaker": "Teacher", "src": "Your homework is to write three functions and test them before next class.", "tgt": "Bài tập về nhà của các em là viết ba hàm và kiểm thử chúng trước buổi học sau." }
+  ]
+}

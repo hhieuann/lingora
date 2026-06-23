@@ -677,6 +677,14 @@ function refreshWordCount(){wordCount.textContent=state.segments.reduce((a,s)=>a
 /* ---------- DỊCH (MyMemory) ---------- */
 async function translate(text,from,to){
   if(!text||from===to)return text;
+  if(API_BASE){
+    try{
+      const r=await fetch(API_BASE+"/api/translate",{method:"POST",headers:{'Content-Type':'application/json'},body:JSON.stringify({text,source:from,target:to})});
+      const d=await r.json();
+      if(d&&typeof d.translatedText==="string")return d.translatedText;
+    }catch(e){console.warn("backend translate error",e);}
+    // lỗi backend → rơi xuống MyMemory bên dưới
+  }
   try{
     const url=`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${from}|${to}`;
     const r=await fetch(url);const d=await r.json();
@@ -939,7 +947,17 @@ async function buildSummary(){
       ]
     };
   }
-  // ----- Từ transcript thật -----
+  // ----- Backend (Bước 2): nếu có API_BASE thì để LLM tóm tắt -----
+  if(API_BASE){
+    try{
+      const r=await fetch(API_BASE+"/api/summarize",{method:"POST",headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({targetLang:tgtSel.value,segments:state.segments.map(s=>({speaker:s.speaker,src:s.src,tgt:s.tgt}))})});
+      const d=await r.json();
+      if(d&&Array.isArray(d.points))return d; // khớp shape renderSummary
+    }catch(e){console.warn("backend summarize error",e);}
+    // lỗi backend → fallback extractive bên dưới
+  }
+  // ----- Từ transcript thật (extractive fallback) -----
   const text=state.segments.map(s=>s.tgt||s.src).join(" ");
   const sentences=text.split(/(?<=[.!?。！？])\s+/).filter(s=>s.trim().length>4);
   const stop=new Set("và là của có các một những được cho với từ này đó khi nếu thì để the a an and or but to of in on for is are was were be will would can could should i you we they it this that".split(" "));
