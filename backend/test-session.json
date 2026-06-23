@@ -1,0 +1,15 @@
+{
+  "title": "Functions in Programming — Lesson 3",
+  "srcLang": "en",
+  "tgtLang": "vi",
+  "durationSeconds": 312,
+  "segments": [
+    { "speaker": "Teacher", "time": "08:00", "srcCode": "en", "tgtCode": "vi", "src": "A function is a reusable block of code.", "tgt": "Hàm là một khối lệnh có thể tái sử dụng." },
+    { "speaker": "Teacher", "time": "08:01", "srcCode": "en", "tgtCode": "vi", "src": "Your homework is to write three functions.", "tgt": "Bài tập của em là viết ba hàm." }
+  ],
+  "summary": {
+    "points": ["Hàm là khối lệnh tái sử dụng."],
+    "vocab": [{ "term": "function", "lang": "en-US", "mean": "hàm" }],
+    "homework": [{ "who": "", "text": "Viết ba hàm và kiểm thử." }]
+  }
+}

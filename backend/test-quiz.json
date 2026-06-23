@@ -1,0 +1,8 @@
+{
+  "targetLang": "vi",
+  "count": 3,
+  "segments": [
+    { "speaker": "Teacher", "src": "A function is a reusable block of code that performs one task.", "tgt": "Hàm là khối lệnh tái sử dụng thực hiện một nhiệm vụ." },
+    { "speaker": "Teacher", "src": "Parameters are values passed into a function; it can return a result.", "tgt": "Tham số là giá trị truyền vào hàm; nó có thể trả về kết quả." }
+  ]
+}
