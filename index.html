@@ -446,7 +446,7 @@
           <span class="mt-ico">🎧</span>
           <div class="mt-body">
             <div class="mt-title">Đang nghe âm thanh cuộc họp <span class="mt-dot"></span></div>
-            <div class="mt-sub" id="txMeetingSub">Phần nhận dạng &amp; dịch trực tiếp sẽ bật ở Bước 2 (backend). Hiện đang thu âm thật của cuộc họp.</div>
+            <div class="mt-sub" id="txMeetingSub">Đang chuẩn bị nhận dạng giọng nói cuộc họp…</div>
           </div>
         </div>
       </div>
@@ -561,9 +561,17 @@
    - Tóm tắt:        demo + extractive cơ bản (next step: LLM qua backend)
    ========================================================= */
 
-/* Cấu hình backend (Bước 2). "" = chưa có backend → dịch dùng MyMemory, tóm tắt extractive,
-   và "âm thanh cuộc họp" ở chế độ thu-chờ. Đặt URL backend để bật nhận dạng/dịch qua server. */
+/* Cấu hình backend (Bước 2). "" = chưa có backend → dịch dùng MyMemory, tóm tắt extractive.
+   Đặt URL backend để bật dịch/tóm tắt/quiz qua server. */
 const API_BASE = "";
+
+/* Nhận dạng giọng nói cho "âm thanh cuộc họp":
+   "browser" = Whisper chạy thẳng trong trình duyệt (transformers.js) — miễn phí, không cần backend/key.
+   "backend" = gửi audio lên {API_BASE}/api/stt (cần backend có endpoint STT). */
+const MEETING_STT = "browser";
+const TRANSFORMERS_CDN = "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.0";
+const WHISPER_MODEL = "Xenova/whisper-tiny";   // nhỏ & nhanh; đổi "Xenova/whisper-base" để chính xác hơn
+const WHISPER_CHUNK_SEC = 7;                    // cứ ~7 giây nhận dạng 1 lần
 
 const LANGS = [
   {code:"en", bcp:"en-US", name:"English"},
@@ -807,31 +815,109 @@ function stopMeetingCapture(){
 }
 function startMeetingTranscription(stream){
   const sub=$("txMeetingSub");
-  if(!API_BASE){
-    sub.textContent="Phần nhận dạng & dịch trực tiếp sẽ bật ở Bước 2 (backend). Hiện đang thu âm thật của cuộc họp.";
+  // Hướng backend (nếu chọn): gửi chunk audio lên /api/stt
+  if(MEETING_STT==="backend" && API_BASE){
+    sub.textContent="Đang nhận dạng giọng nói qua server…";
+    try{
+      meetingRec=new MediaRecorder(stream);
+      meetingRec.ondataavailable=async ev=>{
+        if(!ev.data||!ev.data.size)return;
+        try{
+          const fd=new FormData();fd.append("audio",ev.data,"chunk.webm");fd.append("source",srcSel.value);
+          const r=await fetch(API_BASE+"/api/stt",{method:"POST",body:fd});
+          const d=await r.json();
+          if(d&&d.text&&d.text.trim())await commitMeetingUtterance(d.text.trim());
+        }catch(err){console.warn("stt error",err);}
+      };
+      meetingRec.start(5000);
+    }catch(e){console.warn("MediaRecorder error",e);}
     return;
   }
-  // Có backend: cắt audio theo chunk 5s rồi gửi /api/stt → nhận text → dịch & hiển thị.
-  sub.textContent="Đang nhận dạng giọng nói qua server…";
-  try{
-    meetingRec=new MediaRecorder(stream);
-    meetingRec.ondataavailable=async ev=>{
-      if(!ev.data||!ev.data.size)return;
-      try{
-        const fd=new FormData();fd.append("audio",ev.data,"chunk.webm");fd.append("source",srcSel.value);
-        const r=await fetch(API_BASE+"/api/stt",{method:"POST",body:fd});
-        const d=await r.json();
-        if(d&&d.text&&d.text.trim())await commitMeetingUtterance(d.text.trim());
-      }catch(err){console.warn("stt error",err);}
-    };
-    meetingRec.start(5000);
-  }catch(e){console.warn("MediaRecorder error",e);}
+  // Mặc định: Whisper chạy trong trình duyệt
+  startWhisperCapture(stream);
 }
-function stopMeetingTranscription(){ if(meetingRec){try{meetingRec.stop();}catch(_){}}meetingRec=null; }
+function stopMeetingTranscription(){
+  if(meetingRec){try{meetingRec.stop();}catch(_){}}meetingRec=null;
+  stopWhisperCapture();
+}
 async function commitMeetingUtterance(text){
   const seg={id:"m"+Date.now()+Math.random().toString(36).slice(2,6),time:timeStamp(),speaker:"Cuộc họp",color:speakerColor("CuocHop"),srcCode:srcSel.value,tgtCode:tgtSel.value,src:text,tgt:null};
   state.segments.push(seg);renderSegment(seg,{typing:true});refreshWordCount();
   const t=await translate(text,srcSel.value,tgtSel.value);seg.tgt=t;updateSegmentTgt(seg.id,t);scrollDown();
+}
+
+/* ---------- WHISPER TRONG TRÌNH DUYỆT (transformers.js) ----------
+   Bắt PCM 16kHz từ luồng cuộc họp → cứ WHISPER_CHUNK_SEC giây nhận dạng 1 lần →
+   có text thì dịch & hiển thị thành segment "Cuộc họp". Miễn phí, chạy offline sau khi tải model. */
+let whisperPipe=null,whisperLoading=null,sttCtx=null,sttNodes=null,sttChunks=[],sttSamples=0,sttBusy=false;
+const WHISPER_LANG={en:"english",vi:"vietnamese",ja:"japanese",ko:"korean",zh:"chinese",fr:"french",de:"german",es:"spanish",th:"thai",id:"indonesian",ru:"russian",hi:"hindi"};
+
+function ensureWhisper(onProgress){
+  if(whisperPipe)return Promise.resolve(whisperPipe);
+  if(whisperLoading)return whisperLoading;
+  whisperLoading=(async()=>{
+    const {pipeline}=await import(TRANSFORMERS_CDN);
+    whisperPipe=await pipeline("automatic-speech-recognition",WHISPER_MODEL,{dtype:"q8",progress_callback:onProgress});
+    return whisperPipe;
+  })().catch(e=>{whisperLoading=null;throw e;});
+  return whisperLoading;
+}
+
+async function startWhisperCapture(stream){
+  const sub=$("txMeetingSub");
+  sub.textContent="Đang tải mô hình nhận dạng giọng nói (lần đầu hơi lâu)…";
+  let pipe;
+  try{
+    pipe=await ensureWhisper(p=>{ if(p&&p.status==="progress"&&p.progress!=null) sub.textContent="Đang tải mô hình… "+Math.round(p.progress)+"%"; });
+  }catch(e){
+    console.warn("whisper load error",e);
+    sub.textContent="Không tải được mô hình nhận dạng — kiểm tra mạng, dùng Chrome/Edge mới. (Vẫn đang thu âm.)";
+    showToast("Không tải được mô hình Whisper — kiểm tra kết nối mạng.");
+    return;
+  }
+  if(state.mode!=="recording"||state.source!=="meeting")return; // đã dừng trong lúc tải
+  sub.textContent="Đang nghe & nhận dạng cuộc họp (Whisper). Phụ đề sẽ hiện sau mỗi vài giây.";
+  try{
+    sttCtx=new (window.AudioContext||window.webkitAudioContext)({sampleRate:16000});
+    const src=sttCtx.createMediaStreamSource(stream);
+    const proc=sttCtx.createScriptProcessor(4096,1,1);
+    const sink=sttCtx.createGain();sink.gain.value=0; // không phát ra loa
+    sttChunks=[];sttSamples=0;sttBusy=false;
+    proc.onaudioprocess=(e)=>{
+      const ch=e.inputBuffer.getChannelData(0);
+      sttChunks.push(new Float32Array(ch));sttSamples+=ch.length;
+      if(sttSamples>=16000*WHISPER_CHUNK_SEC && !sttBusy){
+        const audio=flattenSamples(sttChunks,sttSamples);sttChunks=[];sttSamples=0;
+        transcribeChunk(pipe,audio);
+      }
+    };
+    src.connect(proc);proc.connect(sink);sink.connect(sttCtx.destination);
+    sttNodes={src,proc,sink};
+  }catch(e){console.warn("stt capture error",e);sub.textContent="Không thiết lập được thu âm để nhận dạng.";}
+}
+
+function flattenSamples(chunks,total){
+  const out=new Float32Array(total);let off=0;
+  for(const c of chunks){out.set(c,off);off+=c.length;}
+  return out;
+}
+
+async function transcribeChunk(pipe,audio){
+  sttBusy=true;
+  try{
+    const opts={task:"transcribe",chunk_length_s:30};
+    const lang=WHISPER_LANG[srcSel.value];if(lang)opts.language=lang;
+    const out=await pipe(audio,opts);
+    const text=((out&&out.text)||"").trim();
+    if(text && !/^[\s.,!?…-]*$/.test(text)) await commitMeetingUtterance(text);
+  }catch(e){console.warn("whisper transcribe error",e);}
+  finally{sttBusy=false;}
+}
+
+function stopWhisperCapture(){
+  if(sttNodes){try{sttNodes.proc.disconnect();sttNodes.src.disconnect();sttNodes.sink.disconnect();}catch(_){}sttNodes=null;}
+  if(sttCtx){try{sttCtx.close();}catch(_){}sttCtx=null;}
+  sttChunks=[];sttSamples=0;sttBusy=false;
 }
 
 /* ---------- WAVEFORM ---------- */
